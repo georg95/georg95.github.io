@@ -311,7 +311,7 @@ var keys = { W:false, S:false, A:false, D:false };
     
 var jump = false;
 
-var lab2=[
+var labyrinths=[[
     "###############",
     "B #     #   # #",
     "# # ### ### # #",
@@ -321,7 +321,20 @@ var lab2=[
     "#   # # # # # #",
     "##### # # # # #",
     "#     # # #   #",
-    "###############"];
+    "###############"],
+               [
+    "###############",
+    "#   #   # #   #",
+    "# #   #   # # #",
+    "# ######### # F",
+    "B         # ###",
+    "# ######  #   #",
+    "# #       ### #",
+    "# #########   #",
+    "#             #",
+    "###############"]];
+var curr_lab = 0;    
+var lab2=labyrinths[curr_lab];
 function toabscoords(ax, ay)
     {
     return {x:2*ax, y:2*ay};
@@ -330,16 +343,27 @@ function torelcoords(ax, ay)
     {
     return {x:Math.round(ax/2), y:Math.round(ay/2)};
     }
-for (var s in lab2)
-for (var i = 0; i < lab2[s].length; i++)
-        {
-        if(lab2[s][i] == "B")
+function gotostart()
+    {
+    for (var s in lab2)
+    for (var i = 0; i < lab2[s].length; i++)
             {
-            var pos = toabscoords(i,s);
-            xpos = pos.x;
-            ypos = pos.y;
+            if(lab2[s][i] == "B")
+                {
+                var pos = toabscoords(i,s);
+                xpos = pos.x;
+                ypos = pos.y;
+                }
             }
-        }
+    }
+gotostart();
+function newlab()
+    {
+    curr_lab++;
+    lab2=labyrinths[curr_lab];
+    if (lab2 === undefined) { curr_lab = 0; lab2=labyrinths[curr_lab]; }
+    gotostart();
+    }
 var lab = [" |  ",
            "____",
            " |  ",
@@ -409,7 +433,8 @@ function drawScene()
     pos2 = torelcoords(xpos, ypos+ysp+deltay);
     if(lab2[pos2.y] && lab2[pos2.y][pos2.x] && lab2[pos2.y][pos2.x] != "#")
         ypos += ysp;
-        
+    pos2 = torelcoords(xpos, ypos);
+    if(lab2[pos2.y] && lab2[pos2.y][pos2.x] && lab2[pos2.y][pos2.x] == "F") { newlab(); }
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
