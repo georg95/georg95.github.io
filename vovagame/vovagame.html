@@ -40,18 +40,51 @@ var canvas = document.getElementById('game');
 var area = canvas.getContext("2d");
 var bgimg = new Image();
 bgimg.src="bg.png";
-var trolleyimg = new Image();
-trolleyimg.src="trolley.png";
-var handimg = new Image();
-handimg.src="hand.png";
-var dynamiteimg = new Image();
-dynamiteimg.src="dynamite.png";
-var manimg = new Image();
-manimg.src="man.png";
-var enemyimg = new Image();
-enemyimg.src="enemy.png";
+var atrolleyimg = new Image();
+atrolleyimg.src="trolley.png";
+var ahandimg = new Image();
+ahandimg.src="hand.png";
+var adynamiteimg = new Image();
+adynamiteimg.src="dynamite.png";
+var amanimg = new Image();
+amanimg.src="man.png";
+var aenemyimg = new Image();
+aenemyimg.src="enemy.png";
 var retryimg = new Image();
 retryimg.src="retry.png";
+var enemyimg, handimg, dynamiteimg, manimg, trolleyimg;
+var obamaimg=new Image(); obamaimg.src="obama.png";
+var obamahandimg=new Image(); obamahandimg.src="obamahand.png";
+var putinkaimg=new Image(); putinkaimg.src="putinka.png";
+var vatnikimg=new Image(); vatnikimg.src="vatnik.png";
+var obamacarimg=new Image(); obamacarimg.src="obamacar.png";
+function switchNormal()
+    {
+    enemyimg = aenemyimg;
+    dynamiteimg = adynamiteimg;
+    manimg = amanimg;
+    handimg = ahandimg;
+    trolleyimg = atrolleyimg;
+    texmode = "normal";
+    document.title="Kill trolls";
+    }
+function switchVata()
+    {
+    enemyimg = vatnikimg;
+    dynamiteimg = putinkaimg;
+    manimg = obamaimg;
+    handimg = obamahandimg;
+    trolleyimg = obamacarimg;
+    texmode = "vata";
+    document.title="Kill vatniks";
+    }
+switchNormal();
+var texmode = "normal";
+document.addEventListener("keydown", function(e) {
+   if(e.keyCode === 32)
+    { if(texmode === "normal") { switchVata(); }
+      else                     { switchNormal(); }} 
+});    
 var killed = 0;
 var alltrolls = 0;
 var man = {sizex:150/2, sizey:200/2,handangle:0,hp:150,maxhp:150,state:0};
@@ -138,7 +171,10 @@ function setdefaults()
         {
         var flip=this.vx>0?false:true;
         man.draw(this.x, this.y-this.sizey/3, flip);
-        area.drawImage(trolleyimg, this.x-this.sizex/2, this.y-this.sizey/2,this.sizex,this.sizey);
+        area.translate(this.x, this.y);
+        if(flip) { area.scale(-1,1); }
+        area.drawImage(trolleyimg, -this.sizex/2, -this.sizey/2,this.sizex,this.sizey);
+        area.setTransform(1, 0, 0, 1, 0, 0);
         }
     }
 setdefaults();
