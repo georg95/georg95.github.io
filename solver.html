@@ -55,7 +55,8 @@ function SetOptions()
         {
         selects.innerHTML+="<select id =\"sel"+i+"\">"+
                             "<option value='+'>Прибавь</option>"+
-                            "<option value='*'>Умножь на</option></select>"+
+                            "<option value='*'>Умножь на</option>"+
+                            "<option value='^'>Увеличь разряд числа на</option></select>"+
                             "<input type=\"number\" value="+
                             "\"2\" id=val"+i+"><br/>";
         }
@@ -85,8 +86,8 @@ for(;i<opers;++i)
     var e = document.getElementById("sel"+i);
     allopers[i].oper=e.options[e.selectedIndex].value;
     allopers[i].value=parseInt(document.getElementById("val"+i).value);
-	if (allopers[i].value == NaN || (allopers[i].oper != '+' && allopers[i].oper != '*'))
-		{ i--; alert("Неправильный формат"); }
+	if (allopers[i].value == NaN || (allopers[i].oper != '+' && allopers[i].oper != '*' && allopers[i].oper != '^'))
+		{ i--; alert("Неправильный формат"); return; }
 	console.log(allopers[i]);
     }
 
@@ -106,6 +107,17 @@ for (var k = finish-1; k >= start; --k)
 		var lookpoint = 0;
 		if (allopers[i].oper == '+') { lookpoint = k+allopers[i].value; }
 		if (allopers[i].oper == '*') { lookpoint = k*allopers[i].value; }
+        if (allopers[i].oper == '^')
+            {
+            var kk = ""+k;
+            console.log(kk);
+            for (var t = 0; t < kk.length; t++)
+                {
+                var p = parseInt(kk[t]);
+                lookpoint *= 10;
+                lookpoint += (p+allopers[i].value)>9?p:p+allopers[i].value;
+                }
+            }
         if(i !== 0) { curr_solution+=" + "; short_solution+=" + "; }
         curr_solution+="способов ("+k+allopers[i].oper+allopers[i].value+"="+lookpoint+")";
         short_solution+=""+(cells[lookpoint]||0);
