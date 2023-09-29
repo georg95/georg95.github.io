@@ -8,7 +8,7 @@
 <body>
 <p id="warning"></p>
 <p id="coords"></p>
-<button id="button">Lock orientation and fullscreen</button>
+<button id="button">Lock orientation and set fullscreen</button>
 <script>
     var initialX = null;
     var initialY = null;
@@ -48,10 +48,15 @@
     window.addEventListener("MozOrientation",    handleOrientationEvent, true);
     window.addEventListener("deviceorientation", handleOrientationEvent, true);
     setTimeout(isEventFired, 1000);
-    
+
 document.getElementById("button").addEventListener("click", function() {
-  document.documentElement.requestFullScreen();
-  screen.orientation.lock("portrait-primary");
+	try
+		{
+		document.documentElement.requestFullScreen();
+		screen.orientation.lock("portrait-primary");
+		}
+	catch (err)
+	   { alert("Cannot lock"); }
  }, false);
 </script>
 </body>
