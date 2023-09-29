@@ -1,0 +1,1 @@
+print "".join([chr(int(x)%128) for x in raw_input().split() if len("{0:b}".format(int(x)).replace("0",""))%2 == 0]),
