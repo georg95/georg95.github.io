@@ -19,12 +19,32 @@ input
     </div>
     Сколько существует программ для этого исполнителя, преобразующих<br/>
     число <input type="number" id="start" value="1"> в число
-    <input type="number" id="finish" value="21">? <br/>
+    <input type="number" id="finish" value="21">?
+    <input type="checkbox" id="addcase" onchange="AdditionalCase();">при условии</input>
+    <span id="additional">, что траектория вычислений<br/>
+    обязательно содержит число <input type="number" id="included" value=5>
+    и не содержит числа <input type="number" id="excluded" value=10></span> <br/>
 </form>
 <button onClick="get_ways_count();">Ответ:</button> <input type="number" id="answer" disabled=true>
     <div id ="solution"></div>
 <script>
 var opts = 0;
+var additional = false;
+
+function AdditionalCase()
+    {
+    if(document.getElementById("addcase").checked)
+        {
+        document.getElementById("additional").style.display="";
+        additional=true;
+        }
+    else
+        {
+        document.getElementById("additional").style.display="none";
+        additional=false;
+        }
+    }
+AdditionalCase();
 function SetOptions()
     {
     opts = parseInt(document.getElementById("opts").value) || 2;
@@ -47,8 +67,14 @@ start  = 1;//prompt("Введите начальное значение", "1");
 finish = 20;//prompt("Введите итоговое значение(должно быть больше начального)", "20");
 start=document.getElementById("start").value;
 finish=document.getElementById("finish").value;
-start=parseInt(start)-1;
-finish=parseInt(finish)-1;
+
+var included = document.getElementById("included").value;
+var excluded = document.getElementById("excluded").value;
+    
+start=parseInt(start);
+finish=parseInt(finish);
+included=parseInt(included);
+excluded=parseInt(excluded);
 if(start == NaN || finish == NaN) { alert("Неправильный формат, введите числа"); return; }
 var allopers=[];
 var i = 0;
@@ -67,22 +93,39 @@ for(;i<opers;++i)
 console.log("opers = "+opers+"; from "+start+" to "+finish);
     
 var thesolution = "РЕШЕНИЕ:<br/>";
-
+thesolution+="способов ("+finish+") = 1<br/>";
 var cells = [];
 cells[finish] = 1;
 for (var k = finish-1; k >= start; --k)
 	{
 	cells[k] = 0;
+    var curr_solution = "";
+    var short_solution = "";
 	for (var i = 0; i < opers; ++i)
 		{
 		var lookpoint = 0;
 		if (allopers[i].oper == '+') { lookpoint = k+allopers[i].value; }
 		if (allopers[i].oper == '*') { lookpoint = k*allopers[i].value; }
+        if(i !== 0) { curr_solution+=" + "; short_solution+=" + "; }
+        curr_solution+="способов ("+k+allopers[i].oper+allopers[i].value+"="+lookpoint+")";
+        short_solution+=""+(cells[lookpoint]||0);
 		var ways = cells[lookpoint];
 		if(ways != undefined) { cells[k] += ways; }
 		}
-	thesolution+="способов ("+(k+1)+") = "+cells[k]+"<br/>";
-	}
+	if(k === included)
+        {
+        for(var i = k+1; i < finish; i++) { cells[i]=0; }
+        thesolution+="<br/>Теперь при вычислении нижней части(от "+(k-1)+" включительно) все значения выше этой строки равны 0(т.к."+k+" включено обязательно)<br/>";
+        }
+    if(k === excluded)
+        { cells[k] = 0; thesolution+="способов ("+k+") = 0 (т.к. исключено из траектории)<br/>"; }
+    else
+        {
+        thesolution+="способов ("+k+") = "+curr_solution+" = "+short_solution+" = "+cells[k]+"<br/>";
+        if(k === included) { thesolution+="<br/>" }
+        }
+
+    }
 document.getElementById("solution").innerHTML=thesolution;
 document.getElementById("answer").value=cells[start];
 }
