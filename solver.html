@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<meta charset="utf-8"/>
+<html>
+<head>
+<title>EGE.22.SOVLER</title>
+<style>
+input
+    {
+    width: 40px;
+    }
+</style>
+</head>
+<body>
+<form id="form1">
+    Исполнитель Кaлькулятор имеет 
+    <input type="number" id="opts" onchange="SetOptions();" value="1"> команды:
+    <div id="selects">
+    
+    </div>
+    Сколько существует программ для этого исполнителя, преобразующих<br/>
+    число <input type="number" id="start" value="1"> в число
+    <input type="number" id="finish" value="21">? <br/>
+</form>
+<button onClick="get_ways_count();">Ответ:</button> <input type="number" id="answer" disabled=true>
+    <div id ="solution"></div>
+<script>
+var opts = 0;
+function SetOptions()
+    {
+    opts = parseInt(document.getElementById("opts").value) || 2;
+    if (opts > 10 || opts < 1) { opts = 2; }
+    var selects = document.getElementById("selects");
+    selects.innerHTML="<br/>";
+    for (var i = 0; i < opts; i++)
+        {
+        selects.innerHTML+="<select id =\"sel"+i+"\">"+
+                            "<option value='+'>Прибавь</option>"+
+                            "<option value='*'>Умножь на</option></select>"+
+                            "<input type=\"number\" value="+
+                            "\"2\" id=val"+i+"><br/>";
+        }
+    }
+SetOptions();
+function get_ways_count()
+{
+start  = 1;//prompt("Введите начальное значение", "1");
+finish = 20;//prompt("Введите итоговое значение(должно быть больше начального)", "20");
+start=document.getElementById("start").value;
+finish=document.getElementById("finish").value;
+start=parseInt(start)-1;
+finish=parseInt(finish)-1;
+if(start == NaN || finish == NaN) { alert("Неправильный формат, введите числа"); return; }
+var allopers=[];
+var i = 0;
+var opers = opts;
+for(;i<opers;++i)
+	{
+	allopers[i] = {"oper":"", "value":NaN};
+    var e = document.getElementById("sel"+i);
+    allopers[i].oper=e.options[e.selectedIndex].value;
+    allopers[i].value=parseInt(document.getElementById("val"+i).value);
+	if (allopers[i].value == NaN || (allopers[i].oper != '+' && allopers[i].oper != '*'))
+		{ i--; alert("Неправильный формат"); }
+	console.log(allopers[i]);
+    }
+
+console.log("opers = "+opers+"; from "+start+" to "+finish);
+    
+var thesolution = "РЕШЕНИЕ:<br/>";
+
+var cells = [];
+cells[finish] = 1;
+for (var k = finish-1; k >= start; --k)
+	{
+	cells[k] = 0;
+	for (var i = 0; i < opers; ++i)
+		{
+		var lookpoint = 0;
+		if (allopers[i].oper == '+') { lookpoint = k+allopers[i].value; }
+		if (allopers[i].oper == '*') { lookpoint = k*allopers[i].value; }
+		var ways = cells[lookpoint];
+		if(ways != undefined) { cells[k] += ways; }
+		}
+	thesolution+="способов ("+(k+1)+") = "+cells[k]+"<br/>";
+	}
+document.getElementById("solution").innerHTML=thesolution;
+document.getElementById("answer").value=cells[start];
+}
+</script>
+</body>
+</html>
+
