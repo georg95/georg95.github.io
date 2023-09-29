@@ -24,14 +24,15 @@ manimg.src="man.png";
 var enemyimg = new Image();
 enemyimg.src="enemy.png";
 var killed = 0;
-var man = {sizex:150/2, sizey:200/2,handangle:0};
+var man = {sizex:150/2, sizey:200/2,handangle:0,hp:150,maxhp:150};
+var trolley = {x:300,y:200,vx:4,vy:0,sizex:300/2,sizey:200/2};
 var mx = 0; var my = 0;
 var dx=0;
 var clicked = false;
 var worldx = 0;
 var timer = 60*60;
 var endgame = false;
-    
+
 var dynamites=[];
 var effects=[];
 var enemies=[];
@@ -113,12 +114,20 @@ function addEntity(array, ent)
         if(array[i] === undefined) { array[i]=ent; break; }
         }
     }
+man.hit = function(dmg)
+    {
+    this.hp-=dmg;
+    if(this.hp<0) { this.hp = 0; }
+    }
 man.draw = function(x,y,left)
     {
     area.translate(x, y);
+    area.fillStyle = "#0F0";
+    area.fillRect(-this.sizex/2, -this.sizey-4, Math.round(this.sizex*this.hp/this.maxhp), 4);
     if(left) { area.scale(-1,1); }
     area.drawImage(manimg, -this.sizex/2, -this.sizey, this.sizex, this.sizey);
     area.setTransform(1, 0, 0, 1, 0, 0);
+    this.drawhand(x,y,left);
     }
 man.drawhand = function(x,y,left)
     {
@@ -132,9 +141,14 @@ man.drawhand = function(x,y,left)
     }
 man.update=function()
     {
+    if (this.hp <= 0)
+        {
+        this.draw=function(){};
+        endgame=true;
+        }
     this.handangle-=0.1;
     }
-var trolley = {x:300,y:200,vx:4,vy:0,sizex:300/2,sizey:200/2};
+
 trolley.update=function()
     {
     this.x+=this.vx;
@@ -149,7 +163,6 @@ trolley.draw=function()
     {
     var flip=this.vx>0?false:true;
     man.draw(this.x, this.y-this.sizey/3, flip);
-    man.drawhand(this.x, this.y-this.sizey/3, flip);
     area.drawImage(trolleyimg, this.x-this.sizex/2, this.y-this.sizey/2,this.sizex,this.sizey);
     }
 function drawBg(dx)
@@ -210,6 +223,11 @@ function AoeDamage(x, y, radius, dmg)
             {
             enemies[i].hit(dmg*(radius-dst)/radius);
             }
+        }
+    var dst = Math.sqrt((trolley.x-x)*(trolley.x-x)+(trolley.y-y)*(trolley.y-y));
+    if (dst < radius)
+        {
+        man.hit(dmg*(radius-dst)/radius);
         }
     }
 function AddEnemies()
