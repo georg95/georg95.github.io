@@ -4,10 +4,16 @@ function zeroArray(n)
   }
 function assert(testcase, result, accur)
   {
-  if(Math.abs(testcase - result) > accur)
+  if(!accur)
+    {
+    testcase = JSON.stringify(testcase);
+    result = JSON.stringify(result);
+    }
+  if((accur && Math.abs(testcase - result) > accur) || (!accur && testcase !== result))
     {
     console.error('assertion failed, expected ',result, ', given ', testcase);
     }
+
   }
   function sqr(x) { return x*x; }
   function testfunc(vert)
@@ -16,6 +22,12 @@ function assert(testcase, result, accur)
         y = vert[1];
     return 100*sqr(y-sqr(x))+sqr(1-x);
     }
+  function himmelblau(vert)
+    {
+    var x = vert[0],
+        y = vert[1];
+    return sqr(sqr(x)+y-11)+sqr(x+sqr(y)-7);
+    }
 function caclulate()
   {
   document.getElementById("answer").innerHTML = "";
@@ -23,7 +35,7 @@ function caclulate()
   var simplex = getInitialSimplex([0,0], 2);
   testSimplex(simplex, 2);
 
-  NMA(/*simplex*/[[10,9],[10,-2],[21,1]], testfunc);
+  NMA(/*simplex*/[[-2,-0.5],[-4,2.5],[-5,4.5]], himmelblau);
   }
 function getDistance(vert1, vert2)
   {
@@ -99,23 +111,64 @@ function getReflectPoint(xOldPoint, xCenter, reflectCoef, func)
   return newPoint;
   }
 
+
+function drawLine(ctx,x1,y1,x2,y2)
+  {
+  var scale = 100;
+  var diffx = 400;
+  var diffy = -100;
+  ctx.moveTo(x1*scale+diffx,y1*scale+diffy);
+  ctx.lineTo(x2*scale+diffx,y2*scale+diffy);
+  }
+
+function drawPoints(points, ctx)
+  {
+  ctx.strokeStyle="#FFFFFF";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  for(point1 of points)
+    {
+    for(point2 of points)
+      {
+      if(point1 === point2) { continue; }
+      var p1 = point1.verticle, p2 = point2.verticle;
+      drawLine(ctx, p1[0], p1[1], p2[0], p2[1]);
+
+      }
+    }
+  ctx.stroke();
+  }
+
 function NMA(simplex, func, reflection=1.0, compression=0.5, extension=2.0)
   {
+  var canvas = document.getElementById("canv");
+  var ctx    = canvas.getContext('2d');
+  ctx.fillStyle="#000000";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.strokeStyle="#FFFFFF";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(0, 200);
+	ctx.lineTo(400, 200);
+	ctx.moveTo(200, 0);
+  ctx.lineTo(200, 400);
+	ctx.stroke();
   var points = simplex.map(function(verticle, index)
     {
     return { fvalue: func(verticle), 'verticle':verticle };
     });
   console.log(JSON.stringify(points));
-  for(var i = 0; i < 50; i++)
+  for(var i = 0; i < 30; i++)
     {
     replacePointAndShrink(points, func, reflection, compression, extension);
-    console.log(JSON.stringify(points));
+    drawPoints(points, ctx);
     }
   }
 
 function replacePointAndShrink(points, func, reflection, compression, extension)
   {
   sortPoints(points);
+  console.log(JSON.stringify(points));
   var N = points.length-1;
   var xMax1 = points[N],
       xMin  = points[0],
@@ -142,6 +195,13 @@ function tryExtend(points, extension, xCenter, reflectPoint, func)
   points[N] = (extendedPoint.fvalue < xMin.fvalue) ? extendedPoint : reflectPoint;
   }
 
+function swapPoints(pointA, pointB)
+  {
+  [pointA.verticle, pointB.verticle] = [pointB.verticle, pointA.verticle];
+  [pointA.fvalue, pointB.fvalue]     = [pointB.fvalue, pointA.fvalue];
+  }
+
+
 function replacePointsOptimal(points, reflectPoint)
   {
   var N = points.length-1;
@@ -154,7 +214,7 @@ function replacePointsOptimal(points, reflectPoint)
     }
   if(reflectPoint.fvalue < xMax1.fvalue)
     {
-    [points[N], reflectPoint] = [reflectPoint, points[N]];
+    swapPoints(xMax1, reflectPoint);
     }
   return false;
   }
@@ -164,10 +224,10 @@ function simplexCompress(points, compression, xCenter, func)
   var N = points.length-1;
   var xMax1 = points[N],
       xMax2 = points[N-1];
-  var comressedPoint = getReflectPoint(xCenter, xMax1.verticle, compression, func);
+  var comressedPoint = getReflectPoint(xCenter, xMax1.verticle, -compression, func);
   if(comressedPoint.fvalue < xMax1.fvalue)
     {
-    [points[N], comressedPoint] = [comressedPoint, points[N]];
+    swapPoints(xMax1, comressedPoint);
     }
   else
     {
@@ -192,3 +252,33 @@ function shrinkPointTo(point, toPoint, compression)
                         (point.verticle[i]-toPoint.verticle[i])*compression;
     }
   }
+
+function fillValues(points, func)
+  {
+  for(point of points)
+    {
+    point.fvalue = func(point.verticle);
+    }
+  }
+
+function tests()
+  {
+  var ptA = { verticle: [2,-7] };
+  var ptB = { verticle: [1,4] };
+  var ptC = { verticle: [2,4] };
+  var points = [ptA, ptB, ptC];
+  fillValues(points, function(vert) { return sqr(vert[0])+sqr(vert[1]); });
+  assert(ptA,{verticle: [2,-7], fvalue: 53});
+  assert(ptB,{verticle: [1,4], fvalue: 17});
+  assert(ptC,{verticle: [2,4], fvalue: 20});
+
+  sortPoints(points);
+  assert(points, [ptB, ptC, ptA]);
+  assert(getReflectPoint([10,-10], [0,0], 2, function() { return 5; }),
+                         {verticle: [-20,20], fvalue: 5})
+  assert(getCenter([{verticle: [10, 10]},{verticle: [20, 10]}]), [15,10]);
+  var ptX = {verticle: [20,15], fvalue: 5};
+  shrinkPointTo(ptX, {verticle: [0,5], fvalue: 5}, 0.5);
+  assert(ptX, {verticle: [10,10], fvalue: 5});
+  }
+tests();
