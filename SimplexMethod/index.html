@@ -5,21 +5,74 @@
     <title></title>
   </head>
   <body>
+    <input type="text" id="formula" value="a*a*a-6*a*b+8*b*b*b+5"></text>Формула<br>
+    <input type="text" id="values" value="1, 0.5"></text>начальные значения<br>
+    <input type="number" id="eps" value="0.01"></text>точность<br>
+    <input type="number" id="m" value="0.2"></text>значение m<br>
+    <button onclick=caclulate()>Посчитать</button>
+    <div>
+    Ответ:<br>
+    <span id="answer"></span>
+    </div>
     <script type="text/javascript">
 
     function zeroArray(n)
       {
       return Array.apply(null, Array(n)).map(Number.prototype.valueOf,0);
       }
-      calcExtremum();
-function calcExtremum()
+
+      String.prototype.replaceAll = function(search, replacement) {
+          var target = this;
+          return target.split(search).join(replacement);
+      };
+      function caclulate()
+        {
+        document.getElementById("answer").innerHTML = "";
+        var formula = document.getElementById("formula").value;
+        var values = document.getElementById("values").value.split(",").map(parseFloat);
+        var eps = parseFloat(document.getElementById("eps").value);
+        var m = parseFloat(document.getElementById("m").value);
+        calcExtremum(values, m, eps, function(x)
+          {
+          return customFunc(formula, x);
+          });
+        }
+      function outpParams(params)
+        {
+        for(var i = 0; i < params.length; i++)
+          {
+          var cur_let = String.fromCharCode('a'.charCodeAt(0)+i);
+          var cur_value = params[i];
+          document.getElementById("answer").innerHTML += cur_let+" = "+cur_value+"<br>";
+          }
+        }
+    function outpMin(value)
+      {
+      document.getElementById("answer").innerHTML += "Минимум = "+value+"<br>";
+      }
+      function customFunc(funcRaw, vect)
+        {
+        for(var i = 0; i < vect.length; i++)
+          {
+          var cur_let = String.fromCharCode('a'.charCodeAt(0)+i);
+          funcRaw = funcRaw.replaceAll(cur_let, vect[i]);
+          //console.log(funcRaw);
+          }
+        return new Function("return "+funcRaw).call();
+        }
+
+    function f(x)
+    {
+    return Math.pow(x[0],3) - 6*x[0]*x[1] + 8*Math.pow(x[1],3) + 5;
+    //return (x[0]-9)*(x[0]+7);
+    //return 2*x[0]*x[0]*x[0] + 15*x[0]*x[1]*x[1] - 25*x[0] - 17*x[1];
+    }
+function calcExtremum(crd, m, eps, f)
 {
-      var n = 2;
-    	var crd = [1,0.5];
+      var n = crd.length;
         var t;
-        var m=0.2;
-        var eps = 0.01;
         var k,i,j,itr;
+        var limit = 0;
         var itr=0;
         var x = [];
         var xc = [];
@@ -71,9 +124,9 @@ console.log("d1=",d1,"; d2=",d2);
         //console.log("do...");
 
         k=maxIndex(sums);
-        console.log("k max=",k);
+        //console.log("k max=",k);
         setXc();
-        console.log("xc =",xc);
+        //console.log("xc =",xc);
         setX();
         t = f(x);
         //console.log("x =",x,"; f(x)=",t);
@@ -85,7 +138,7 @@ console.log("d1=",d1,"; d2=",d2);
         else
           {
           k=minIndex(sums);
-          console.log("k min=",k);
+          //console.log("k min=",k);
           for(i=1;i<=n;i++)
               for(j=0;j<n;j++)
               if(i !=k )
@@ -100,7 +153,7 @@ console.log("d1=",d1,"; d2=",d2);
         }
 
         t = f(xc);
-        console.log("xc =",xc[0],xc[1],"; f(xc)=",t);
+        //console.log("xc =",xc[0],xc[1],"; f(xc)=",t);
         k=0;
         for(i=0; i<=n;i++)
             if(Math.abs(t-sums[i])<eps)
@@ -109,14 +162,22 @@ console.log("d1=",d1,"; d2=",d2);
                 itr++;
             }
             else {
-                console.log(Math.abs(t-sums[i]), " <  eps; ",t,sums[i]);
+                //console.log(Math.abs(t-sums[i]), " <  eps; ",t,sums[i]);
             }
         //console.log("k =",k,"; t=",t);
+        limit++;
+        if(limit > 10000)
+          {
+          document.getElementById("answer").innerHTML = "исчерпан лимит итераций(10000)";
+          return;
+          }
         }
         while(k != n+1);
         k = minIndex(sums);
         console.log("Results\n");
         console.log("Iterations = ",itr);
+        outpParams(s[k]);
+        outpMin(sums[k]);
         for(j=0;j<n;j++)
             console.log("x["+(j+1)+"] = ",s[k][j]);
         console.log("Function body = ", sums[k]);
@@ -132,12 +193,6 @@ function setXansSums(x, sums, s, n)
     }
 }
 
-function f(x)
-{
-return Math.pow(x[0],3) - 6*x[0]*x[1] + 8*Math.pow(x[1],3) + 5;
-//return (x[0]-9)*(x[0]+7);
-//return 2*x[0]*x[0]*x[0] + 15*x[0]*x[1]*x[1] - 25*x[0] - 17*x[1];
-}
     function maxIndex(arr)
       {
       return arr.indexOf(Math.max.apply(null, arr));
