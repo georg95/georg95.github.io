@@ -24,7 +24,7 @@ manimg.src="man.png";
 var enemyimg = new Image();
 enemyimg.src="enemy.png";
 var killed = 0;
-
+var alltrolls = 0;
 var trolley = {x:300,y:200,vx:4,vy:0,sizex:300/2,sizey:200/2};
 var mx = 0; var my = 0;
 var dx=0;
@@ -81,6 +81,28 @@ function dynamite(x,y,fx,fy)
     this.sy = y;
     this.t = 0;
     this.angle = 0; 
+    }
+function effectFlowText(t, text, style, color, sx, sy, dy)
+    {
+    this.time = t;
+    this.alltime=t;
+    this.text = text;
+    this.style = style;
+    this.color = color;
+    this.sx = sx;
+    this.sy = sy;
+    this.dy = dy;
+    return this;
+    }
+effectFlowText.prototype.update=function() { if(this.time <= 0) { return false; } this.time-=1; return true; }
+effectFlowText.prototype.draw = function()
+    {
+    area.font = this.style;
+    area.fillStyle = "rgba("+this.color+","+this.time/this.alltime+")";
+    area.textAlign = "center";
+    area.textBaseline = "bottom";
+    area.fillText(this.text, this.sx,
+                  this.sy+this.dy-this.dy*this.time/this.alltime)
     }
 dynamite.prototype.sizex=50;
 dynamite.prototype.sizey=50;
@@ -198,7 +220,11 @@ Enemy.prototype.update = function()
     {
     if(this.hp<=0)
         {
+        alltrolls--;
         killed++;
+        timer+=60*2;
+        addEntity(effects, new effectFlowText(40, "+2s", "bold 20px Arial", "80,255,120",
+                this.x, this.y-this.size/2, -this.size/2));
         addEntity(effects, new effectTralDie(20, this.x,this.y+this.size/2,this.size));
         return false;
         }
@@ -239,8 +265,9 @@ function AoeDamage(x, y, radius, dmg)
     }
 function AddEnemies()
     {
-    if(Math.random()<0.005)
+    if(Math.random()<0.001*(15-alltrolls))
         {
+        alltrolls++;
         var en = new Enemy(Math.random()*canvas.width, canvas.height,
                            -1.5+Math.random()*3,-1-Math.random()*2)
         addEntity(enemies, en);
