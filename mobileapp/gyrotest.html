@@ -38,7 +38,9 @@ html, body
     var initialY = null;
     var alpha=0, gamma=0;
     var x=0,y=0,z=0;
-    var issafari = orientation in window;
+    var ua = navigator.userAgent.toLowerCase();
+    var issafari = false;
+    if(ua.indexOf("safari") > -1) { issafari=true; }
     var gyrocoords = document.getElementById('gyrocoords');
     var accelcoords = document.getElementById('accelcoords');
     function handleOrientationEvent(event)
