@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <style>
+    body
+        {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        }
+  html, body, #container, form
+      {
+      height: 100%;
+      width: 100%;
+      margin:0px;
+      padding:0px;
+      overflow: hidden;
+      }
+      #container {
+        background-image:    url(Source/back.png);
+        background-size:     100% 100%;
+    }
+    #buttons
+      {
+      display: inline-block;
+      position: absolute;
+      top:83%;
+      left:30%;
+
+      width: 50%;
+      height: 10%;
+      }
+    .button
+      {
+      position: relative;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      display: inline-block;
+      width: 30%;
+      height: 100%;
+      }
+    #button_day
+      {
+      background-image: url(Source/day-button.png);
+      }
+    #day:checked +#button_day
+      {
+      background-image: url(Source/day-pushed-button.png);
+      }
+
+    #button_week
+      {
+      background-image: url(Source/week-button.png);
+      }
+    #week:checked +#button_week
+      {
+      background-image: url(Source/week-pushed-button.png);
+      }
+
+    #button_month
+      {
+      background-image: url(Source/month-button.png);
+      }
+    #month:checked +#button_month
+      {
+      background-image: url(Source/month-pushed-button.png);
+      }
+     .virtual { display: none; }
+     #select_period
+       {
+       left: 12%;
+       top: 65%;
+       position: absolute;
+       width: 75%;
+       height: 15%;
+       vertical-align: middle;
+       }
+      .helper
+        {
+        display: inline-block;
+        height: 100%;
+        vertical-align: middle;
+        }
+    .roller
+      {
+      vertical-align: middle;
+      position: relative;
+      left: 0px;
+      }
+      #period_numbers
+        {
+        position: absolute;
+
+        left: 15%;
+        top: 55%;
+
+        width: 70%;
+        height: 15%;
+        vertical-align: middle;
+        }
+      #numbers
+        {
+        z-index: 1;
+        position: absolute;
+        width: 100%;
+        height: 100%;
+          background-image: url(Source/figures.png);
+          background-size: contain;
+          background-repeat: no-repeat;
+          background-position: center;
+        }
+      #red_roller
+        {
+        left: 0px;
+        width: auto;
+        height: 50%;
+        -webkit-transform: translate(-50%,0%);
+        transform: translate(-50%,0%);
+        /* transition: left 0.2s linear; */
+        }
+      #white_roller
+        {
+        width: auto;
+        height: 90%;
+        }
+
+      #man
+        {
+        position: absolute;
+
+        left: 30%;
+        top: 5%;
+
+        width: 40%;
+        height: 55%;
+
+        background-image: url(Source/sad.png);
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        }
+      #pill
+        {
+        z-index: 2;
+        position: absolute;
+        width: 10%;
+        height: auto;
+        left: 10%;
+        top: 20%;
+
+        -webkit-transform: translate(-50%,-50%) rotate(45deg);
+        transform: translate(-50%,-50%) rotate(45deg);
+        transition: width 0.15s ease-in-out;
+        }
+    </style>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+<div id="container">
+    <img id="pill" src="Source/pill.png">
+
+  <div id="man">
+  </div>
+
+  <div id="period_numbers">
+    <div id="numbers"></div>
+    <span class="helper"></span>
+      <img id = "red_roller" class = "roller" src="Source/roller red.png"/>
+  </div>
+
+
+  <div id="select_period">
+    <span class="helper"></span>
+      <img id = "white_roller" class = "roller" src="Source/roller white.png"/>
+  </div>
+
+
+  <div id="buttons">
+    <form>
+      <input type="radio" name="period" id="day" class = "virtual">
+      <label for="day" class="button" id="button_day"></label>
+
+      <input type="radio" name="period" id="week" class = "virtual">
+      <label for="week" class="button" id="button_week"></label>
+
+      <input type="radio" name="period" id="month" class = "virtual">
+      <label for="month" class="button" id="button_month"></label>
+    </form>
+  </div>
+
+
+</div>
+<script>
+var white_roller = document.getElementById("white_roller");
+var red_roller = document.getElementById("red_roller");
+var pill = document.getElementById("pill");
+var man = document.getElementById("man");
+var last_red_number = 0;
+
+function setRedRollPosition(number, numbers_size)
+  {
+  if(last_red_number === number) { return; }
+  last_red_number = number;
+  red_roller.style.left = (number*numbers_size/(21-1))+"px";
+  }
+
+function setRollerPosition(new_position, max_shift, numbers_size)
+  {
+  new_position = Math.max(new_position, 0);
+  new_position = Math.min(new_position, max_shift);
+
+  var red_roll_pos_abs = new_position*(numbers_size/max_shift);
+  var red_roll_num = Math.round(red_roll_pos_abs/numbers_size*(21-1));
+  //console.log("num = "+red_roll_num);
+  setRedRollPosition(red_roll_num, numbers_size);
+  white_roller.style.left = new_position+"px";
+  }
+
+white_roller.onmousedown = function(e)
+  {
+  e = e || window.event;
+  var touch_start = 0 || e.pageX || e.clientX;
+  var current_position = Number(white_roller.style.left.slice(0,-2));
+  var max_shift = document.getElementById("select_period").clientWidth -
+                                              white_roller.clientWidth;
+  var numbers_size = document.getElementById("numbers").clientWidth*0.98; // centering last[21] number
+
+  document.body.onmousemove = function(e)
+    {
+    e = e || window.event;
+    var touch_current = 0 || e.pageX || e.clientX;
+
+    var new_position = current_position+(touch_current-touch_start);
+    setRollerPosition(new_position, max_shift, numbers_size);
+    };
+  document.body.onmouseup = function()
+    {
+    document.body.onmousemove = document.body.onmouseup = null;
+    };
+  return false; // prevent default
+  }
+function putPill(x, y)
+  {
+  if(x > man.offsetLeft &&
+      x < man.offsetLeft+man.clientWidth &&
+      y > man.offsetTop &&
+      y < man.offsetTop+man.clientHeight)
+    {
+    pill.style.display = "none";
+    man.style.backgroundImage="url(Source/happy.png)";
+    }
+  pill.style.width="10%";
+  }
+
+pill.onmousedown = function(e)
+  {
+  e = e || window.event;
+  pill.style.width="15%";
+
+  document.body.onmousemove = function(e)
+    {
+    e = e || window.event;
+    var finger_x = 0 || e.pageX || e.clientX;
+    var finger_y = 0 || e.pageY || e.clientY;
+
+    pill.style.left = finger_x+"px";
+    pill.style.top = finger_y+"px";
+    };
+  document.body.onmouseup = function(e)
+    {
+    e = e || window.event;
+    var finger_x = 0 || e.pageX || e.clientX;
+    var finger_y = 0 || e.pageY || e.clientY;
+
+    putPill(finger_x, finger_y);
+    document.body.onmousemove = document.body.onmouseup = null;
+    };
+  return false; // prevent default
+  }
+</script>
+  </body>
+</html>
