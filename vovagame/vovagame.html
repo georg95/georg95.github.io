@@ -24,7 +24,7 @@ manimg.src="man.png";
 var enemyimg = new Image();
 enemyimg.src="enemy.png";
 var killed = 0;
-var man = {sizex:150/2, sizey:200/2,handangle:0,hp:150,maxhp:150};
+
 var trolley = {x:300,y:200,vx:4,vy:0,sizex:300/2,sizey:200/2};
 var mx = 0; var my = 0;
 var dx=0;
@@ -114,6 +114,11 @@ function addEntity(array, ent)
         if(array[i] === undefined) { array[i]=ent; break; }
         }
     }
+var man = {sizex:150/2, sizey:200/2,handangle:0,hp:150,maxhp:150,state:0};
+man.act = function()
+    {
+    if(this.state == 0) { this.state = 30; addEntity(dynamites, new dynamite(trolley.x, trolley.y, mx, my)); }
+    }
 man.hit = function(dmg)
     {
     this.hp-=dmg;
@@ -146,7 +151,9 @@ man.update=function()
         this.draw=function(){};
         endgame=true;
         }
-    this.handangle-=0.1;
+    if(this.state != 0) { this.state--; }
+    this.handangle=Math.PI/2*this.state/30;
+    if(this.state == 0) { this.handangle=Math.PI/2; }
     }
 
 trolley.update=function()
@@ -257,7 +264,7 @@ function DrawLoop()
     drawBg(dx);
     if (!endgame)
         {
-        if(clicked) { addEntity(dynamites, new dynamite(trolley.x, trolley.y, mx, my)); }
+        if(clicked) { man.act(); }
         AddEnemies();
 
         timer--;
