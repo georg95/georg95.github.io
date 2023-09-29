@@ -38,6 +38,7 @@ html, body
     var initialY = null;
     var alpha=0, gamma=0;
     var x=0,y=0,z=0;
+    var issafari = orientation in window;
     var gyrocoords = document.getElementById('gyrocoords');
     var accelcoords = document.getElementById('accelcoords');
     function handleOrientationEvent(event)
@@ -132,6 +133,7 @@ var vx = 3;
 var vy = -2;
 var vcoef = 0.8;
 var gcoef = 0.4;
+if (issafari) { gcoef=-gcoef; }
 function UpdateCoords()
 	{
 	sphere.style.left = sx+"px";
