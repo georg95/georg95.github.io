@@ -221,29 +221,50 @@ function setRollerPosition(new_position, max_shift, numbers_size)
   white_roller.style.left = new_position+"px";
   }
 
-white_roller.onmousedown = function(e)
+function setMove(object, callback)
   {
-  e = e || window.event;
-  var touch_start = 0 || e.pageX || e.clientX;
+  object.onmousemove = object.ontouchmove = callback;
+  }
+function setRelease(object, callback)
+  {
+  object.onmouseup = object.ontouchend = callback;
+  }
+function setPick(object, callback)
+  {
+  object.onmousedown = object.ontouchstart = callback;
+  }
+function releaseMoveAndUp()
+  {
+  var object = document.body;
+  setRelease(object, null);
+  setMove(object, null);
+  return false;
+  }
+
+function rollerTake(e)
+  {
+  var finger_pos = getEventCoords(e);
+  var touch_start = finger_pos[0];
+
   var current_position = Number(white_roller.style.left.slice(0,-2));
   var max_shift = document.getElementById("select_period").clientWidth -
                                               white_roller.clientWidth;
   var numbers_size = document.getElementById("numbers").clientWidth*0.98; // centering last[21] number
 
-  document.body.onmousemove = function(e)
+  var rollerMove = function (e)
     {
-    e = e || window.event;
-    var touch_current = 0 || e.pageX || e.clientX;
+    finger_pos = getEventCoords(e);
+    var touch_current = finger_pos[0];
 
     var new_position = current_position+(touch_current-touch_start);
     setRollerPosition(new_position, max_shift, numbers_size);
     };
-  document.body.onmouseup = function()
-    {
-    document.body.onmousemove = document.body.onmouseup = null;
-    };
+
+  setMove(document.body, rollerMove);
+  setRelease(document.body, releaseMoveAndUp);
   return false; // prevent default
   }
+
 function pillPutInteract(x, y)
   {
   if(x > man.offsetLeft &&
@@ -261,11 +282,10 @@ function pillTake(e)
   {
   e = e || window.event;
   pill.style.width="15%";
-  document.body.onmousemove = pillMove;
-  document.body.onmouseup = pillPut;
 
-  document.body.ontouchmove = pillMove;
-  document.body.ontouchend = pillPut;
+  setMove(document.body, pillMove);
+  setRelease(document.body, pillPut);
+
   return false; // prevent default
   }
 function getEventCoords(e)
@@ -282,7 +302,7 @@ function getEventCoords(e)
   }
 
 var finger_x, finger_y; // cuz touchend dont give x,y coords
-  
+
 function pillMove(e)
   {
   var finger_pos = getEventCoords(e);
@@ -296,12 +316,13 @@ function pillMove(e)
 function pillPut(e)
   {
   pillPutInteract(finger_x, finger_y);
-  document.body.onmousemove = document.body.onmouseup = null;
-  document.body.ontouchmove = document.body.ontouchend = null;
+  releaseMoveAndUp();
   return false;
   };
-pill.onmousedown = pillTake;
-pill.ontouchstart = pillTake;
+
+
+setPick(pill, pillTake);
+setPick(white_roller, rollerTake);
 </script>
   </body>
 </html>
