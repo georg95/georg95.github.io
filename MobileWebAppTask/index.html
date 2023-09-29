@@ -265,7 +265,7 @@ function pillTake(e)
   document.body.onmouseup = pillPut;
 
   document.body.ontouchmove = pillMove;
-  document.body.ontouchup = pillPut;
+  document.body.ontouchend = pillPut;
   return false; // prevent default
   }
 function getEventCoords(e)
@@ -298,7 +298,7 @@ function pillPut(e)
 
   pillPutInteract(finger_x, finger_y);
   document.body.onmousemove = document.body.onmouseup = null;
-  document.body.ontouchmove = document.body.ontouchup = null;
+  document.body.ontouchmove = document.body.ontouchend = null;
   return false;
   };
 pill.onmousedown = pillTake;
