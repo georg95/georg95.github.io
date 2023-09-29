@@ -12,13 +12,40 @@
 <style media="screen">
 body
 	{
-	background: #AAA;
-	font-family: Arial;
+	background: url(background.jpg);
+	background-attachment: fixed;
+	background-size: cover;
+	font-family: monospace;
+	text-shadow: 0 0 0.2em gray;
 	}
 figure
 	{
 	display: inline-block;
 	}
+.head
+	{
+	font-size: 1.5em;
+	}
+.social
+	{
+	width: 3.5em;
+	height: 3.5em;
+	}
+.linksblock
+	{
+	text-align: center;
+	}
+a { color: #559; }
+a:visited { color: #434; }
+*	{ transition: all 0.2s ease-in-out; }
+img {
+    -webkit-filter: grayscale(100%); /* Safari 6.0 - 9.0 */
+    filter: grayscale(100%);
+}
+img:hover {
+    -webkit-filter: grayscale(0%); /* Safari 6.0 - 9.0 */
+    filter: grayscale(0%);
+}
 </style>
 </head>
 	<body>
@@ -26,7 +53,7 @@ figure
 		//setTimeout(function() { location.reload() }, 5000);
 		</script>
 		<header>
-			<h1>Some web experiments here</h1>
+			<span class='head'>Some web experiments here</span>
 		</header>
 		<a href='https://georgsh.github.io/xmastree.html'><figure><img src='icons/xmastree.png' alt='xmasASCII'/><figcaption>procedural generated ASCII XMas tree</figcaption></figure></a>
 		<a href='https://georgsh.github.io/uum32'><figure><img src='icons/asm.png'/><figcaption>UUM32 assembler+VM</figcaption></figure></a>
@@ -48,6 +75,11 @@ figure
 						 <li><a href="https://georgsh.github.io/githubstat">My github statistics</a></li>
 						 <li><a href="https://georgsh.github.io/kokoko/">Кококо</a></li>
 					 </ul>
+		</div>
+		<div class='linksblock'>
+			by georgsh
+			<a href='https://github.com/georgsh'><img class='social' src='social/github.png'></a>
+			<a href='https://vk.com/id50737942'><img class='social' src='social/vk.png'></a>
 		</div>
     </body>
 </html>
