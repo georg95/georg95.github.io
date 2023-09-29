@@ -160,6 +160,7 @@ function ViewCoords()
 	appinfo.innerHTML="Width: "+document.body.clientWidth+"; ";
 	appinfo.innerHTML+="Height: "+document.body.clientHeight+"; ";
 	appinfo.innerHTML+="<br>position: ("+sx.toFixed(1)+", "+sy.toFixed(1)+")";
+	appinfo.innerHTML+="<br>velocity: ("+vx.toFixed(1)+", "+vy.toFixed(1)+")";
 	}
 
 setInterval(UpdateCoords, 20);
