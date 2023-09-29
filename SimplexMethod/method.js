@@ -16,7 +16,7 @@ function assert(testcase, result, accur)
 
   }
   function sqr(x) { return x*x; }
-  function testfunc(vert)
+  function rosenbrock(vert)
     {
     var x = vert[0],
         y = vert[1];
@@ -31,11 +31,13 @@ function assert(testcase, result, accur)
 function caclulate()
   {
   document.getElementById("answer").innerHTML = "";
-  var edge = 2;
-  var simplex = getInitialSimplex([0,0], 2);
-  testSimplex(simplex, 2);
-
-  NMA(/*simplex*/[[-2,-0.5],[-4,2.5],[-5,4.5]], himmelblau);
+  var edge = 4;
+  var simplex = getInitialSimplex([0,0], edge);
+  testSimplex(simplex, edge);
+  var resultPoint1 = NMA(simplex, rosenbrock, 0.001);
+  var resultPoint2 = NMA([[-2,-0.5],[-4,2.5],[-5,4.5]], himmelblau, 0.001);
+  console.log("point1:",JSON.stringify(resultPoint1));
+  console.log("point2:",JSON.stringify(resultPoint2));
   }
 function getDistance(vert1, vert2)
   {
@@ -54,6 +56,50 @@ function testSimplex(simplex, edge)
       }
     }
   }
+
+function drawLine(ctx,x1,y1,x2,y2)
+  {
+  var scale = 100;
+  var diffx = 400;
+  var diffy = -100;
+  ctx.moveTo(x1*scale+diffx,y1*scale+diffy);
+  ctx.lineTo(x2*scale+diffx,y2*scale+diffy);
+  }
+
+function drawPoints(points, ctx)
+  {
+  ctx.strokeStyle="#FFFFFF";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  for(point1 of points)
+    {
+    for(point2 of points)
+      {
+      if(point1 === point2) { continue; }
+      var p1 = point1.verticle, p2 = point2.verticle;
+      drawLine(ctx, p1[0], p1[1], p2[0], p2[1]);
+      }
+    }
+  ctx.stroke();
+  }
+
+function drawCanvas()
+  {
+  var canvas = document.getElementById("canv");
+  var ctx    = canvas.getContext('2d');
+  ctx.fillStyle="#000000";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.strokeStyle="#FFFFFF";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(0, 200);
+	ctx.lineTo(400, 200);
+	ctx.moveTo(200, 0);
+  ctx.lineTo(200, 400);
+	ctx.stroke();
+  return ctx;
+  }
+
 function getInitialSimplex(x0, edge)
   {
   var n = x0.length;
@@ -99,81 +145,43 @@ function getCenter(points)
   return xCenter.map(function(coord) { return coord / points.length });
   }
 
-function getReflectPoint(xOldPoint, xCenter, reflectCoef, func)
+function getAccuracy(points)
   {
-  var newPoint = { verticle: [] };
-  for(var i = 0; i < xCenter.length; i++)
+  var center = getCenter(points);
+  var totalDist = 0;
+  for(point of points)
     {
-    newPoint.verticle[i] = xCenter[i]*(1+reflectCoef)-
-                         xOldPoint[i]*reflectCoef;
+    totalDist += getDistance(point.verticle, center);
     }
-  newPoint.fvalue = func(newPoint.verticle);
-  return newPoint;
+  //console.log("totalDist:",totalDist);
+  return totalDist/points.length;
   }
 
-
-function drawLine(ctx,x1,y1,x2,y2)
+function NMA(simplex, func, eps, reflection=1.0, compression=0.5, extension=2.0)
   {
-  var scale = 100;
-  var diffx = 400;
-  var diffy = -100;
-  ctx.moveTo(x1*scale+diffx,y1*scale+diffy);
-  ctx.lineTo(x2*scale+diffx,y2*scale+diffy);
-  }
-
-function drawPoints(points, ctx)
-  {
-  ctx.strokeStyle="#FFFFFF";
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  for(point1 of points)
-    {
-    for(point2 of points)
-      {
-      if(point1 === point2) { continue; }
-      var p1 = point1.verticle, p2 = point2.verticle;
-      drawLine(ctx, p1[0], p1[1], p2[0], p2[1]);
-
-      }
-    }
-  ctx.stroke();
-  }
-
-function NMA(simplex, func, reflection=1.0, compression=0.5, extension=2.0)
-  {
-  var canvas = document.getElementById("canv");
-  var ctx    = canvas.getContext('2d');
-  ctx.fillStyle="#000000";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.strokeStyle="#FFFFFF";
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(0, 200);
-	ctx.lineTo(400, 200);
-	ctx.moveTo(200, 0);
-  ctx.lineTo(200, 400);
-	ctx.stroke();
+  var ctx = drawCanvas();
   var points = simplex.map(function(verticle, index)
     {
     return { fvalue: func(verticle), 'verticle':verticle };
     });
-  console.log(JSON.stringify(points));
-  for(var i = 0; i < 30; i++)
+  //console.log(JSON.stringify(points));
+  while(getAccuracy(points) > eps)
     {
     replacePointAndShrink(points, func, reflection, compression, extension);
     drawPoints(points, ctx);
     }
+  return points[0];
   }
 
 function replacePointAndShrink(points, func, reflection, compression, extension)
   {
   sortPoints(points);
-  console.log(JSON.stringify(points));
+  //console.log(JSON.stringify(points));
   var N = points.length-1;
   var xMax1 = points[N],
       xMin  = points[0],
       xCenter = getCenter(points.slice(0,-1));
-  console.dir(xCenter);
+  //console.dir(xCenter);
   var reflectPoint = getReflectPoint(xMax1.verticle, xCenter, reflection, func);
   if(reflectPoint.fvalue < xMin.fvalue)
     {
@@ -186,21 +194,17 @@ function replacePointAndShrink(points, func, reflection, compression, extension)
     }
   }
 
-function tryExtend(points, extension, xCenter, reflectPoint, func)
+function getReflectPoint(xOldPoint, xCenter, reflectCoef, func)
   {
-  var N = points.length-1;
-  var xMin = points[0];
-  var extendedPoint = getReflectPoint(reflectPoint.verticle, xCenter, -extension, func);
-
-  points[N] = (extendedPoint.fvalue < xMin.fvalue) ? extendedPoint : reflectPoint;
+  var newPoint = { verticle: [] };
+  for(var i = 0; i < xCenter.length; i++)
+    {
+    newPoint.verticle[i] = xCenter[i]*(1+reflectCoef)-
+                         xOldPoint[i]*reflectCoef;
+    }
+  newPoint.fvalue = func(newPoint.verticle);
+  return newPoint;
   }
-
-function swapPoints(pointA, pointB)
-  {
-  [pointA.verticle, pointB.verticle] = [pointB.verticle, pointA.verticle];
-  [pointA.fvalue, pointB.fvalue]     = [pointB.fvalue, pointA.fvalue];
-  }
-
 
 function replacePointsOptimal(points, reflectPoint)
   {
@@ -218,6 +222,24 @@ function replacePointsOptimal(points, reflectPoint)
     }
   return false;
   }
+
+
+function tryExtend(points, extension, xCenter, reflectPoint, func)
+  {
+  var N = points.length-1;
+  var xMin = points[0];
+  var extendedPoint = getReflectPoint(reflectPoint.verticle, xCenter, -extension, func);
+
+  points[N] = (extendedPoint.fvalue < xMin.fvalue) ? extendedPoint : reflectPoint;
+  }
+
+function swapPoints(pointA, pointB)
+  {
+  [pointA.verticle, pointB.verticle] = [pointB.verticle, pointA.verticle];
+  [pointA.fvalue, pointB.fvalue]     = [pointB.fvalue, pointA.fvalue];
+  }
+
+
 
 function simplexCompress(points, compression, xCenter, func)
   {
