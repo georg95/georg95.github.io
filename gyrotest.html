@@ -44,16 +44,15 @@
             warningElement.innerHTML = 'Warning: Cannot receive device orientation events, this browser is not supported.';
         	}
     	}
-    screen.lockOrientationUniversal = screen.orientation.lock || screen.lockOrientation || screen.mozLockOrientation || screen.msLockOrientation;
-    if(!screen.lockOrientationUniversal) { alert("orientation cannot be locked!"); }
+
     window.addEventListener("MozOrientation",    handleOrientationEvent, true);
     window.addEventListener("deviceorientation", handleOrientationEvent, true);
     setTimeout(isEventFired, 1000);
-document.getElementById("button").addEventListener("click", function()
-	{
-  	var allowed = screen.lockOrientationUniversal("portrait-primary");
- 	if(!allowed) { alert("orientation not locked!"); }
- 	}, false);
+    
+document.getElementById("button").addEventListener("click", function() {
+  document.documentElement.requestFullScreen();
+  screen.orientation.lock("portrait-primary");
+ }, false);
 </script>
 </body>
 
