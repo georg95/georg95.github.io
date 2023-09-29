@@ -280,11 +280,14 @@ function getEventCoords(e)
     }
   return [x, y];
   }
+
+var finger_x, finger_y; // cuz touchend dont give x,y coords
+  
 function pillMove(e)
   {
   var finger_pos = getEventCoords(e);
-  var finger_x = finger_pos[0];
-  var finger_y = finger_pos[1];
+  finger_x = finger_pos[0];
+  finger_y = finger_pos[1];
 
   pill.style.left = finger_x+"px";
   pill.style.top = finger_y+"px";
@@ -292,10 +295,6 @@ function pillMove(e)
   };
 function pillPut(e)
   {
-  var finger_pos = getEventCoords(e);
-  var finger_x = finger_pos[0];
-  var finger_y = finger_pos[1];
-
   pillPutInteract(finger_x, finger_y);
   document.body.onmousemove = document.body.onmouseup = null;
   document.body.ontouchmove = document.body.ontouchend = null;
