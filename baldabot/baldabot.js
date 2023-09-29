@@ -10,7 +10,7 @@ var usedWords=[];
 // =================== loading dictionary (rdict variable) ===================
 var script = document.createElement("script");
 script.type = "text/javascript";
-script.src = "__russdict.js";
+script.src = "deps/russdict.js";
 script.onload = function(){
     newGame("слово");
 };
@@ -352,4 +352,3 @@ function newGame(w)
     findAllWords();
     viewField();
     }
-
