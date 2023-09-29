@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<head>
+<title>Gyroscope test</title>
+</head>
+
+<body>
+<p id="warning"></p>
+<p id="coords"></p>
+<script>
+    var initialX = null;
+    var initialY = null;
+
+    var coords = document.getElementById('coords');
+    function handleOrientationEvent(event)
+    	{
+
+        var x = event.beta ? event.beta : event.y * 90;
+        var y = event.gamma ? event.gamma : event.x * 90;
+        window.console && console.info('Raw position: x, y: ', x, y);
+
+        if (!initialX && !initialY)
+        	{
+            initialX = x;
+            initialY = y;
+        	}
+        else
+        	{
+            var positionX = initialX - x;
+            var positionY = initialY - y;
+
+            coords.innerHTML  = 'x='+positionX+'; ';
+            coords.innerHTML += 'y='+positionY;
+        	}
+    	}
+
+    function isEventFired()
+    	{
+        if (!initialX && !initialY)
+        	{
+            var warningElement = document.getElementById('warning');
+            warningElement.innerHTML = 'Warning: Cannot receive device orientation events, this browser is not supported.';
+        	}
+    	}
+    window.addEventListener("MozOrientation",    handleOrientationEvent, true);
+    window.addEventListener("deviceorientation", handleOrientationEvent, true);
+    setTimeout(isEventFired, 1000);
+</script>
+</body>
+
+</html> 
