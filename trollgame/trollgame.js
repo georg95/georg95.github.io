@@ -1,40 +1,3 @@
-<!doctype html>
-<meta charset="utf-8"/>
-<html>
-<head>
-<title>Kill trolls</title>
-<style>
-body 
-    {
-    -webkit-user-select: none;  /* Chrome all / Safari all */
-    -moz-user-select: none;     /* Firefox all */
-    -ms-user-select: none;      /* IE 10+ */
-    user-select: none;          /* Likely future */
-    background: #000;
-    }
-html, body
-    {
-    margin:0px;
-    padding:0px;
-    overflow: hidden;
-    }
-canvas
-    {
-    padding-left: 0;
-    padding-right: 0;
-    padding-top: 0;
-    padding-bottom: 0;
-    margin-left: auto;
-    margin-right: auto;
-    margin-bottom: auto;
-    margin-top: auto;
-    display: block;
-    }
-</style>
-</head>
-	<body onload="start()">
-		<canvas width="800" height="600" id="game"></canvas>
-<script>
 "use strict"
 
 var canvas = document.getElementById('game');
@@ -433,6 +396,3 @@ function start()
         }
     window.requestAnimationFrame(DrawLoop);
     }
-</script>
-    </body>
-</html>
