@@ -50,8 +50,11 @@ var manimg = new Image();
 manimg.src="man.png";
 var enemyimg = new Image();
 enemyimg.src="enemy.png";
+var retryimg = new Image();
+retryimg.src="retry.png";
 var killed = 0;
 var alltrolls = 0;
+var man = {sizex:150/2, sizey:200/2,handangle:0,hp:150,maxhp:150,state:0};
 var trolley = {x:300,y:200,vx:4,vy:0,sizex:300/2,sizey:200/2};
 var mx = 0; var my = 0;
 var dx=0;
@@ -63,6 +66,81 @@ var endgame = false;
 var dynamites=[];
 var effects=[];
 var enemies=[];
+function setdefaults()
+    {
+    killed = 0;
+    alltrolls = 0;
+    dynamites=[];
+    effects=[];
+    enemies=[];
+    man = {sizex:150/2, sizey:200/2,handangle:0,hp:150,maxhp:150,state:0};
+    trolley = {x:300,y:200,vx:4,vy:0,sizex:300/2,sizey:200/2};
+    mx = 0;
+    my = 0;
+    dx=0;
+    clicked = false;
+    worldx = 0;
+    timer = 60*60;
+    endgame = false;
+    man.act = function()
+        {
+        if(this.state == 0) { this.state = 30; addEntity(dynamites, new dynamite(trolley.x, trolley.y, mx, my)); }
+        }
+    man.hit = function(dmg)
+        {
+        this.hp-=dmg;
+        if(this.hp<0) { this.hp = 0; }
+        }
+    man.draw = function(x,y,left)
+        {
+        area.translate(x, y);
+        area.fillStyle = "#0F0";
+        area.fillRect(-this.sizex/2, -this.sizey-4, Math.round(this.sizex*this.hp/this.maxhp), 4);
+        if(left) { area.scale(-1,1); }
+        area.drawImage(manimg, -this.sizex/2, -this.sizey, this.sizex, this.sizey);
+        area.setTransform(1, 0, 0, 1, 0, 0);
+        this.drawhand(x,y,left);
+        }
+    man.drawhand = function(x,y,left)
+        {
+        var handx = x;
+        var handy = y-this.sizey/3;
+        area.translate(handx, handy);
+        if(left) { area.scale(-1,1); }
+        area.rotate(this.handangle);
+        area.drawImage(handimg, -50/4, -50/4, 180/2, 50/2);
+        area.setTransform(1, 0, 0, 1, 0, 0);
+        }
+    man.update=function()
+        {
+        if (this.hp <= 0)
+            {
+            this.draw=function(){};
+            endgame=true;
+            }
+        if(this.state != 0) { this.state--; }
+        this.handangle=Math.PI/2*this.state/30;
+        if(this.state == 0) { this.handangle=Math.PI/2; }
+        }
+
+    trolley.update=function()
+        {
+        this.x+=this.vx;
+        this.y+=this.vy;
+        if(this.x<0){this.x=0; this.vx=-this.vx;}
+        if(this.y<0){this.y=0; this.vy=-this.vy;}
+        if(this.x>canvas.width) {this.x=canvas.width;  this.vx=-this.vx;}
+        if(this.y>canvas.height){this.y=canvas.height; this.vy=-this.vy;}
+        man.update();
+        }
+    trolley.draw=function()
+        {
+        var flip=this.vx>0?false:true;
+        man.draw(this.x, this.y-this.sizey/3, flip);
+        area.drawImage(trolleyimg, this.x-this.sizex/2, this.y-this.sizey/2,this.sizex,this.sizey);
+        }
+    }
+setdefaults();
 function effectBigBoom(t, sx, sy, radius)
     {
     this.time = t;
@@ -163,64 +241,7 @@ function addEntity(array, ent)
         if(array[i] === undefined) { array[i]=ent; break; }
         }
     }
-var man = {sizex:150/2, sizey:200/2,handangle:0,hp:150,maxhp:150,state:0};
-man.act = function()
-    {
-    if(this.state == 0) { this.state = 30; addEntity(dynamites, new dynamite(trolley.x, trolley.y, mx, my)); }
-    }
-man.hit = function(dmg)
-    {
-    this.hp-=dmg;
-    if(this.hp<0) { this.hp = 0; }
-    }
-man.draw = function(x,y,left)
-    {
-    area.translate(x, y);
-    area.fillStyle = "#0F0";
-    area.fillRect(-this.sizex/2, -this.sizey-4, Math.round(this.sizex*this.hp/this.maxhp), 4);
-    if(left) { area.scale(-1,1); }
-    area.drawImage(manimg, -this.sizex/2, -this.sizey, this.sizex, this.sizey);
-    area.setTransform(1, 0, 0, 1, 0, 0);
-    this.drawhand(x,y,left);
-    }
-man.drawhand = function(x,y,left)
-    {
-    var handx = x;
-    var handy = y-this.sizey/3;
-    area.translate(handx, handy);
-    if(left) { area.scale(-1,1); }
-    area.rotate(this.handangle);
-    area.drawImage(handimg, -50/4, -50/4, 180/2, 50/2);
-    area.setTransform(1, 0, 0, 1, 0, 0);
-    }
-man.update=function()
-    {
-    if (this.hp <= 0)
-        {
-        this.draw=function(){};
-        endgame=true;
-        }
-    if(this.state != 0) { this.state--; }
-    this.handangle=Math.PI/2*this.state/30;
-    if(this.state == 0) { this.handangle=Math.PI/2; }
-    }
 
-trolley.update=function()
-    {
-    this.x+=this.vx;
-    this.y+=this.vy;
-    if(this.x<0){this.x=0; this.vx=-this.vx;}
-    if(this.y<0){this.y=0; this.vy=-this.vy;}
-    if(this.x>canvas.width) {this.x=canvas.width;  this.vx=-this.vx;}
-    if(this.y>canvas.height){this.y=canvas.height; this.vy=-this.vy;}
-    man.update();
-    }
-trolley.draw=function()
-    {
-    var flip=this.vx>0?false:true;
-    man.draw(this.x, this.y-this.sizey/3, flip);
-    area.drawImage(trolleyimg, this.x-this.sizex/2, this.y-this.sizey/2,this.sizex,this.sizey);
-    }
 function drawBg(dx)
     {
     var dxs = Math.floor(dx/canvas.width*800);
@@ -343,6 +364,13 @@ function DrawLoop()
         area.fillStyle = "#FFF";
         area.fillText("GAME OVER", canvas.width/2, canvas.height/2-30);
         area.fillText("TROLLS KILLED: "+killed, canvas.width/2, canvas.height/2);
+        var retryx=canvas.width/2;
+        var retryy=canvas.height/2+40;
+        area.drawImage(retryimg, retryx-20, retryy-20, 40, 40);
+        if(clicked && (mx-retryx)*(mx-retryx)+(my-retryy)*(my-retryy) < (20*20)/2)
+            {
+            setdefaults();
+            }
         }
     DrawTimer();
     if(timer == 0) { endgame=true; }
