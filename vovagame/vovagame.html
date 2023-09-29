@@ -22,6 +22,70 @@ dynamiteimg.src="dynamite.png";
 var manimg = new Image();
 manimg.src="man.png";
 var man = {sizex:150/2, sizey:200/2,handangle:0};
+var mx = 0; var my = 0;
+var clicked = false;
+
+var dynamites=[];
+var effects=[];
+function effectBigBoom(t, sx, sy, radius)
+    {
+    this.time = t;
+    this.alltime=t;
+    this.sx = sx;
+    this.sy = sy;
+    this.radius = radius;
+    return this;
+    };
+effectBigBoom.prototype.update=function() { if(this.time <= 0) { return false; } this.time-=1; return true; }
+effectBigBoom.prototype.draw = function()
+    {
+    area.globalAlpha=this.time/this.alltime;
+    area.strokeStyle = "#FF0";
+    area.lineWidth=this.radius/4;
+    area.beginPath();
+    area.arc(this.sx,this.sy,this.radius*(1-this.time/this.alltime),0,2*Math.PI);
+    area.stroke();
+    area.globalAlpha=1;
+    }
+function dynamite(x,y,fx,fy)
+    {
+    this.x = x;
+    this.y = y;
+    this.dx = fx-x;
+    this.dy = fy-y;
+    this.sx = x;
+    this.sy = y;
+    this.t = 0;
+    this.angle = 0; 
+    }
+dynamite.prototype.sizex=50;
+dynamite.prototype.sizey=50;
+dynamite.prototype.update = function()
+    {
+    this.t+=1;
+    if(this.t>=100) { addEntity(effects, new effectBigBoom(50, this.x, this.y, 100)); return false; }
+    this.x=this.sx+this.dx*this.t/100;
+    this.y=this.sy+this.dy*this.t/100;
+    this.angle+=0.2;
+    return true;
+    }
+dynamite.prototype.draw= function()
+    {
+    area.translate(this.x, this.y);
+    area.rotate(this.angle);
+    area.drawImage(dynamiteimg, -this.sizex/2, -this.sizey/2, this.sizex, this.sizey);
+    area.setTransform(1, 0, 0, 1, 0, 0);
+    }
+
+function updateEntities(array) { for(var i in array) { if(!array[i].update()) { delete array[i];} } }
+function drawEntities(array) { for(var i in array) { array[i].draw(); } }
+function addEntity(array, ent)
+    {
+    for(var i = 0; i <= array.length; i++)
+        {
+        if(array[i] === undefined) { array[i]=ent; break; }
+        }
+    }
 man.draw = function(x,y,left)
     {
     area.translate(x, y);
@@ -75,11 +139,16 @@ function DrawLoop()
     if(dx < 0) { dx+=canvas.width; }
     if(dx >= canvas.width) { dx-=canvas.width; }
     drawBg(dx);
+    if(clicked) { addEntity(dynamites, new dynamite(trolley.x, trolley.y, mx, my)); }
+    updateEntities(dynamites);
+    updateEntities(effects);
     trolley.update();
     trolley.draw();
+    drawEntities(dynamites);
+    drawEntities(effects);
     window.requestAnimationFrame(DrawLoop);
+    clicked=false;
     }
-    
 function start()
     {
     (function() {
@@ -87,6 +156,11 @@ function start()
                                   window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
       window.requestAnimationFrame = requestAnimationFrame;
     })();
+    canvas.onclick=function(e) { clicked = true; mx = e.pageX-canvas.offsetLeft; my = e.pageY-canvas.offsetTop; }
+    canvas.onkeydown=function(e)
+        {
+        ;
+        }
     window.requestAnimationFrame(DrawLoop);
     }
 </script>
