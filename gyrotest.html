@@ -8,7 +8,7 @@
 <body>
 <p id="warning"></p>
 <p id="coords"></p>
-<button id="button">Lock orientation and set fullscreen</button>
+<button id="button">Lock orientation and set fullscreen#2</button>
 <script>
     var initialX = null;
     var initialY = null;
@@ -48,15 +48,42 @@
     window.addEventListener("MozOrientation",    handleOrientationEvent, true);
     window.addEventListener("deviceorientation", handleOrientationEvent, true);
     setTimeout(isEventFired, 1000);
+function enterFullscreen(e) {
 
-document.getElementById("button").addEventListener("click", function() {
-	try
-		{
-		document.documentElement.requestFullScreen();
-		screen.orientation.lock("portrait-primary");
+	if (RunPrefixMethod(document, "FullScreen") || RunPrefixMethod(document, "IsFullScreen")) {
+		RunPrefixMethod(document, "CancelFullScreen");
+	}
+	else {
+		RunPrefixMethod(document.documentElement, "RequestFullScreen");
+	}
+
+}
+
+var pfx = ["webkit", "moz", "ms", "o", ""];
+function RunPrefixMethod(obj, method) {
+	
+	var p = 0, m, t;
+	while (p < pfx.length && !obj[m]) {
+		m = method;
+		if (pfx[p] == "") {
+			m = m.substr(0,1).toLowerCase() + m.substr(1);
 		}
-	catch (err)
-	   { alert("Cannot lock"); }
+		m = pfx[p] + m;
+		t = typeof obj[m];
+		if (t != "undefined") {
+			pfx = [pfx[p]];
+			return (t == "function" ? obj[m]() : obj[m]);
+		}
+		p++;
+	}
+
+}
+document.getElementById("button").addEventListener("click", function() {
+		try {
+		enterFullscreen();
+		screen.orientation.lock("portrait-primary");
+	  	}
+	  catch(e) { alert("Cannot lock"); }
  }, false);
 </script>
 </body>
