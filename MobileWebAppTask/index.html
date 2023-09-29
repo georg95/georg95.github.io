@@ -195,6 +195,7 @@
 
 </div>
 <script>
+"use strict";
 var white_roller = document.getElementById("white_roller");
 var red_roller = document.getElementById("red_roller");
 var pill = document.getElementById("pill");
@@ -256,31 +257,38 @@ function putPill(x, y)
   pill.style.width="10%";
   }
 
-pill.onmousedown = function(e)
+function pillTake(e)
   {
   e = e || window.event;
   pill.style.width="15%";
+  document.body.onmousemove = pillMove;
+  document.body.onmouseup = pillPut;
 
-  document.body.onmousemove = function(e)
-    {
-    e = e || window.event;
-    var finger_x = 0 || e.pageX || e.clientX;
-    var finger_y = 0 || e.pageY || e.clientY;
-
-    pill.style.left = finger_x+"px";
-    pill.style.top = finger_y+"px";
-    };
-  document.body.onmouseup = function(e)
-    {
-    e = e || window.event;
-    var finger_x = 0 || e.pageX || e.clientX;
-    var finger_y = 0 || e.pageY || e.clientY;
-
-    putPill(finger_x, finger_y);
-    document.body.onmousemove = document.body.onmouseup = null;
-    };
+  document.body.ontouchmove = pillMove;
+  document.body.ontouchup = pillPut;
   return false; // prevent default
   }
+function pillMove(e)
+  {
+  e = e || window.event;
+  var finger_x = 0 || e.pageX || e.clientX;
+  var finger_y = 0 || e.pageY || e.clientY;
+
+  pill.style.left = finger_x+"px";
+  pill.style.top = finger_y+"px";
+  };
+function pillPut(e)
+  {
+  e = e || window.event;
+  var finger_x = 0 || e.pageX || e.clientX;
+  var finger_y = 0 || e.pageY || e.clientY;
+
+  putPill(finger_x, finger_y);
+  document.body.onmousemove = document.body.onmouseup = null;
+  document.body.ontouchmove = document.body.ontouchup = null;
+  };
+pill.onmousedown = pillTake;
+pill.ontouchstart = pillTake;
 </script>
   </body>
 </html>
