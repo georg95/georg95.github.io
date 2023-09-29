@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<meta charset="utf-8"/>
+<html>
+<head>
+  <title>Fourier Series</title>
+  <script src="math.min.js"></script>
+  <script src="d3.min.js"></script>
+  <script src="plot.js"></script>
+
+  <style>
+    input[type=text] {
+      width: 300px;
+    }
+    input {
+      padding: 6px;
+    }
+    body, html, input {
+      font-family: sans-serif;
+      font-size: 11pt;
+
+    }
+    form {
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+
+<form id="form">
+ <table>
+ <tr>
+  <td><label for="summands">Enter number of summands:</label></td>
+  <td><input type="text" id="summands" value="7"/></td>
+ </tr>
+ <tr>
+  <td><label for="interval">Enter approximation interval:</label></td>
+  <td><input type="text" id="interval" value="3.1415"/></td>
+ </tr>
+ <tr>
+  <td><label for="accuracy">Enter integral accuracy(optional):</label></td>
+  <td><input type="text" id="accuracy" value="100"/></td>
+ </tr>
+ <tr>
+  <td><label for="eq">Enter an equation:</label></td>
+  <td><input type="text" id="eq" value="f(x) = x*x" /></td>
+ </tr>
+</table>
+  <input type="submit" value="Draw" /> 
+</form>
+
+<div id="plot"></div>
+
+<script>
+//-------------- fourier coefficients ----------------
+function integral(f, a, b, parts)
+    {
+    var dx = (b-a)/parts;
+    var sum = 0;
+    for(var i = 0; i < parts; i++)
+        {
+        sum += f(a+(i+1/2)*dx)*dx;
+        }
+    return sum;
+    }
+    
+function getAn(fnx, n, l, accuracy)
+    {
+    return 1/l*integral(
+        function(x) {return fnx(x)*Math.cos(Math.PI*n*x/l);}, -l, l, accuracy);
+    }
+function getBn(fnx, n, l, accuracy)
+    {
+    return 1/l*integral(
+        function(x) {return fnx(x)*Math.sin(Math.PI*n*x/l);}, -l, l, accuracy);
+    }
+function getA0(fnx, l, accuracy)
+    {
+    return 1/l*integral(fnx, -l, l, accuracy);
+    }
+//-------------- fourier coefficients ----------------
+
+function CreateFourierSumN(fnx, n, l, accuracy)
+    {
+    var a0=getA0(fnx, l, accuracy);
+    var a=new Array(n);
+    var b=new Array(n);
+    for(var i = 0; i < n; i++)
+        {
+        a[i]=getAn(fnx, i+1, l, accuracy);
+        b[i]=getBn(fnx, i+1, l, accuracy);
+        }
+    return function(x)
+        {
+        var sum = a0/2;
+        for(var i = 0; i < n; i++)
+            {
+            sum+=a[i]*Math.cos(Math.PI*(i+1)*x/l)+
+                 b[i]*Math.sin(Math.PI*(i+1)*x/l);
+            }
+        return sum;
+        }
+    }
+
+
+
+  function draw()
+  {
+  var accuracy = Number(document.getElementById('accuracy').value) || 100;
+  var interval = Number(document.getElementById('interval').value) || Math.PI;
+  var summands = Number(document.getElementById('summands').value) || 7;
+    try {
+      functionPlot({
+        target: '#plot',
+        yDomain: [-10, 10],
+        xDomain: [-10, 10],
+        data: [{
+          fn: CreateFourierSumN(math.eval(document.getElementById('eq').value), summands, interval, accuracy)
+        }]
+      });
+    }
+    catch (err) {
+      console.log(err);
+      alert(err);
+    }
+  }
+
+  document.getElementById('form').onsubmit = function (event) {
+    event.preventDefault();
+    draw();
+  };
+
+  draw();
+</script>
+
+</body>
+</html>
+
