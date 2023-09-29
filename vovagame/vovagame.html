@@ -23,12 +23,15 @@ var manimg = new Image();
 manimg.src="man.png";
 var enemyimg = new Image();
 enemyimg.src="enemy.png";
+var killed = 0;
 var man = {sizex:150/2, sizey:200/2,handangle:0};
 var mx = 0; var my = 0;
 var dx=0;
 var clicked = false;
 var worldx = 0;
-
+var timer = 60*60;
+var endgame = false;
+    
 var dynamites=[];
 var effects=[];
 var enemies=[];
@@ -175,6 +178,7 @@ Enemy.prototype.update = function()
     {
     if(this.hp<=0)
         {
+        killed++;
         addEntity(effects, new effectTralDie(20, this.x,this.y+this.size/2,this.size));
         return false;
         }
@@ -217,6 +221,14 @@ function AddEnemies()
         addEntity(enemies, en);
         }
     }
+function DrawTimer()
+    {
+    area.font = "bold 20px Arial";
+    area.textAlign = "left";
+    area.textBaseline = "top";
+    area.fillStyle = "#FFF";
+    area.fillText("TIME: "+Math.floor(timer/60)+"s", 20, 20);
+    }
 function DrawLoop()
     {
     //area.fillStyle="#FFF";
@@ -225,16 +237,36 @@ function DrawLoop()
     if(dx < 0) { dx+=canvas.width; }
     if(dx >= canvas.width) { dx-=canvas.width; }
     drawBg(dx);
-    if(clicked) { addEntity(dynamites, new dynamite(trolley.x, trolley.y, mx, my)); }
+    if (!endgame)
+        {
+        if(clicked) { addEntity(dynamites, new dynamite(trolley.x, trolley.y, mx, my)); }
+        AddEnemies();
+
+        timer--;
+        }
+    else
+        {
+        area.fillStyle="#000";
+        var statsx = 300;
+        var statsy = 150;
+        area.fillRect(canvas.width/2-statsx/2, canvas.height/2-statsy/2, statsx, statsy);
+        area.font = "bold 20px Arial";
+        area.textAlign = "center";
+        area.textBaseline = "middle";
+        area.fillStyle = "#FFF";
+        area.fillText("GAME OVER", canvas.width/2, canvas.height/2-30);
+        area.fillText("TROLLS KILLED: "+killed, canvas.width/2, canvas.height/2);
+        }
     updateEntities(dynamites);
     updateEntities(effects);
-    AddEnemies();
     updateEntities(enemies);
     trolley.update();
     trolley.draw();
     drawEntities(enemies);
     drawEntities(dynamites);
     drawEntities(effects);
+    DrawTimer();
+    if(timer == 0) { endgame=true; }
     window.requestAnimationFrame(DrawLoop);
     clicked=false;
     }
