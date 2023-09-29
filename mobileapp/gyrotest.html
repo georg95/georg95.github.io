@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<head>
+<title>Gyroscope test</title>
+<style>
+body 
+    {
+    -webkit-user-select: none;  /* Chrome all / Safari all */
+    -moz-user-select: none;     /* Firefox all */
+    -ms-user-select: none;      /* IE 10+ */
+    user-select: none;          /* Likely future */
+    background: #555;
+    }
+html, body
+    {
+    margin:0px;
+    padding:0px;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    }
+.abs
+	{
+	position: absolute;
+	}
+</style>
+</head>
+<body>
+<img src="sphere.png" class="abs" id="sphere" style="left: 150px; top: 150px;">
+<p id="warning"></p>
+<p id="gyrocoords"></p>
+<p id="accelcoords"></p>
+<h1 id="fullscreenadvice">Tap to fullscreen</h1>
+<script>
+    var initialX = null;
+    var initialY = null;
+    var alpha=0, gamma=0;
+    var x=0,y=0,z=0;
+    var gyrocoords = document.getElementById('gyrocoords');
+    var accelcoords = document.getElementById('accelcoords');
+    function handleOrientationEvent(event)
+    	{
+        var x = event.beta ? event.beta : event.y * 90;
+        var y = event.gamma ? event.gamma : event.x * 90;
+        alpha = x;
+        gamma = y;
+        if (!initialX && !initialY)
+        	{
+            initialX = x;
+            initialY = y;
+        	}
+        else
+        	{
+            //gyrocoords.innerHTML  = 'Gyroscope: x='+x.toFixed(1)+'; ';
+            //gyrocoords.innerHTML += 'y='+y.toFixed(1);
+        	}
+    	}
+
+    function handleMotionEvent(event)
+    	{
+    	var acceleration = event.accelerationIncludingGravity;
+        x = acceleration.x;
+        y = acceleration.y;
+        z = acceleration.z;
+        //accelcoords.innerHTML  = 'Motion: x='+x.toFixed(1)+'; ';
+        //accelcoords.innerHTML += 'y='+y.toFixed(1)+'; ';
+        //accelcoords.innerHTML += 'z='+z.toFixed(1);
+    	}
+    function isEventFired()
+    	{
+        if (!initialX && !initialY)
+        	{
+            var warningElement = document.getElementById('warning');
+            //warningElement.innerHTML = 'Warning: Cannot receive device orientation events, this browser is not supported.';
+        	}
+    	}
+
+    window.addEventListener("MozOrientation",    handleOrientationEvent, true);
+    window.addEventListener("deviceorientation", handleOrientationEvent, true);
+    window.addEventListener("devicemotion", handleMotionEvent, true);
+
+    setTimeout(isEventFired, 1000);
+function enterFullscreen(e) {
+
+	if (RunPrefixMethod(document, "FullScreen") || RunPrefixMethod(document, "IsFullScreen")) {
+		RunPrefixMethod(document, "CancelFullScreen");
+	}
+	else {
+		RunPrefixMethod(document.documentElement, "RequestFullScreen");
+	}
+
+}
+
+var pfx = ["webkit", "moz", "ms", "o", ""];
+function RunPrefixMethod(obj, method) {
+	
+	var p = 0, m, t;
+	while (p < pfx.length && !obj[m]) {
+		m = method;
+		if (pfx[p] == "") {
+			m = m.substr(0,1).toLowerCase() + m.substr(1);
+		}
+		m = pfx[p] + m;
+		t = typeof obj[m];
+		if (t != "undefined") {
+			pfx = [pfx[p]];
+			return (t == "function" ? obj[m]() : obj[m]);
+		}
+		p++;
+	}
+
+}
+function LockFullscreen(e)
+	{
+	document.body.ontouchstart="";
+		try {
+		document.getElementById("fullscreenadvice").innerHTML="";
+		enterFullscreen();
+		screen.orientation.lock("portrait-primary");
+	  	}
+	  catch(e) { alert("Cannot lock"); }
+	}
+if (typeof document.body.ontouchstart === "undefined") { alert("Touch not supported"); }
+document.body.ontouchstart=LockFullscreen;
+var sphere = document.getElementById("sphere");
+var sx = 150;
+var sy = 150;
+var r = 35;
+var vx = 3;
+var vy = -2;
+var vcoef = 0.8;
+var gcoef = 0.4;
+function UpdateCoords()
+	{
+	sphere.style.left = sx+"px";
+	sphere.style.top = sy+"px";
+	vx+=-x*gcoef;
+	vy+=y*gcoef;
+	sx+=vx;
+	sy+=vy;
+	if(sx > document.body.clientWidth-2*r) { vx=-vx*vcoef; sx=document.body.clientWidth-2*r; }
+	if(sy > document.body.clientHeight-2*r) { vy=-vy*vcoef; sy=document.body.clientHeight-2*r; }
+	if(sx < 0) { vx=-vx*vcoef; sx = 0; }
+	if(sy < 0) { vy=-vy*vcoef; sy = 0; }
+	}
+
+setInterval(UpdateCoords, 20);
+/*
+document.getElementById("button").addEventListener("click", function() {
+		try {
+		enterFullscreen();
+		screen.orientation.lock("portrait-primary");
+	  	}
+	  catch(e) { alert("Cannot lock"); }
+ }, false);*/
+</script>
+</body>
+
+</html> 
