@@ -1,1 +1,1 @@
-http://georgsh.ddns.net
+http://georg95.ddns.net
