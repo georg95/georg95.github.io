@@ -62,12 +62,13 @@ var clicked = false;
 var worldx = 0;
 var timer = 60*60;
 var endgame = false;
-
+var bonussec = 2;
 var dynamites=[];
 var effects=[];
 var enemies=[];
 function setdefaults()
     {
+    bonussec = 2;
     killed = 0;
     alltrolls = 0;
     dynamites=[];
@@ -84,7 +85,7 @@ function setdefaults()
     endgame = false;
     man.act = function()
         {
-        if(this.state == 0) { this.state = 30; addEntity(dynamites, new dynamite(trolley.x, trolley.y, mx, my)); }
+        if(this.state == 0) { this.state = 60; addEntity(dynamites, new dynamite(trolley.x, trolley.y, mx, my)); }
         }
     man.hit = function(dmg)
         {
@@ -119,8 +120,8 @@ function setdefaults()
             endgame=true;
             }
         if(this.state != 0) { this.state--; }
-        this.handangle=Math.PI/2*this.state/30;
-        if(this.state == 0) { this.handangle=Math.PI/2; }
+        this.handangle=Math.PI/2*(this.state-45)/15;
+        if(this.state <= 45) { this.handangle=Math.PI/2; }
         }
 
     trolley.update=function()
@@ -216,8 +217,8 @@ dynamite.prototype.update = function()
     this.t+=1;
     if(this.t>=100)
         {
-        AoeDamage(this.x, this.y, 100, 150);
-        addEntity(effects, new effectBigBoom(50, this.x, this.y, 100)); return false;
+        AoeDamage(this.x, this.y, 150, 200);
+        addEntity(effects, new effectBigBoom(30, this.x, this.y, 100)); return false;
         }
     this.x=this.sx+this.dx*this.t/100;
     this.y=this.sy+this.dy*this.t/100;
@@ -270,9 +271,10 @@ Enemy.prototype.update = function()
         {
         alltrolls--;
         killed++;
-        timer+=60*2;
-        addEntity(effects, new effectFlowText(40, "+2s", "bold 20px Arial", "80,255,120",
+        timer+=60*bonussec;
+        addEntity(effects, new effectFlowText(40, "+"+bonussec+"s", "bold 20px Arial", "80,255,120",
                 this.x, this.y-this.size/2, -this.size/2));
+        bonussec++;
         addEntity(effects, new effectTralDie(20, this.x,this.y+this.size/2,this.size));
         return false;
         }
@@ -313,7 +315,7 @@ function AoeDamage(x, y, radius, dmg)
     }
 function AddEnemies()
     {
-    if(Math.random()<0.001*(10-alltrolls))
+    if(Math.random()<0.002*(10-alltrolls))
         {
         alltrolls++;
         var en = new Enemy(Math.random()*canvas.width, canvas.height,
@@ -344,6 +346,7 @@ function DrawLoop()
 
         timer--;
         }
+    bonussec = 2;
     updateEntities(dynamites);
     updateEntities(effects);
     updateEntities(enemies);
