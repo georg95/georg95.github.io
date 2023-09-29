@@ -11,6 +11,8 @@
 "use strict"
 var canvas = document.getElementById('game');
 var area = canvas.getContext("2d");
+var bgimg = new Image();
+bgimg.src="bg.png";
 var trolleyimg = new Image();
 trolleyimg.src="trolley.png";
 var handimg = new Image();
@@ -41,7 +43,7 @@ man.update=function()
     {
     this.handangle-=0.1;
     }
-var trolley = {x:0,y:200,vx:5,vy:0,sizex:300/2,sizey:200/2};
+var trolley = {x:300,y:200,vx:0,vy:0,sizex:300/2,sizey:200/2};
 trolley.update=function()
     {
     this.x+=this.vx;
@@ -59,10 +61,20 @@ trolley.draw=function()
     man.drawhand(this.x, this.y-this.sizey/3, flip);
     area.drawImage(trolleyimg, this.x-this.sizex/2, this.y-this.sizey/2,this.sizex,this.sizey);
     }
+function drawBg(dx)
+    {
+    var dxs = Math.floor(dx/canvas.width*800);
+    if(dx != canvas.width) area.drawImage(bgimg,dxs,0,800-dxs, 600, 0,0, canvas.width-dx,canvas.height);
+    if(dx != 0) area.drawImage(bgimg,0,0,dxs, 600, canvas.width-dx,0, dx,canvas.height);
+    }
+var dx=0;
 function DrawLoop()
     {
-    area.fillStyle="#FFF";
-    area.fillRect(0,0,canvas.width,canvas.height);
+    //area.fillStyle="#FFF";
+    dx-=2;
+    if(dx < 0) { dx+=canvas.width; }
+    if(dx >= canvas.width) { dx-=canvas.width; }
+    drawBg(dx);
     trolley.update();
     trolley.draw();
     window.requestAnimationFrame(DrawLoop);
