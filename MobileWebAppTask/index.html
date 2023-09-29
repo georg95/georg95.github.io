@@ -207,6 +207,23 @@ var pill = document.getElementById("pill");
 var man = document.getElementById("man");
 var last_red_number = 0;
 
+
+function setMove(object, callback)
+  {
+  object.onmousemove = object.ontouchmove = callback;
+  }
+function setRelease(object, callback)
+  {
+  object.onmouseup = object.ontouchend = callback;
+  }
+function setPick(object, callback)
+  {
+  object.onmousedown = object.ontouchstart = callback;
+  }
+
+
+
+
 function setRedRollPosition(number, numbers_size)
   {
   if(last_red_number === number) { return; }
@@ -226,18 +243,6 @@ function setRollerPosition(new_position, max_shift, numbers_size)
   white_roller.style.left = new_position+"px";
   }
 
-function setMove(object, callback)
-  {
-  object.onmousemove = object.ontouchmove = callback;
-  }
-function setRelease(object, callback)
-  {
-  object.onmouseup = object.ontouchend = callback;
-  }
-function setPick(object, callback)
-  {
-  object.onmousedown = object.ontouchstart = callback;
-  }
 function releaseMoveAndUp()
   {
   var object = document.body;
@@ -269,6 +274,10 @@ function rollerTake(e)
   setRelease(document.body, releaseMoveAndUp);
   return false; // prevent default
   }
+
+
+
+
 
 function pillPutInteract(x, y)
   {
@@ -326,8 +335,29 @@ function pillPut(e)
   };
 
 
+
 setPick(pill, pillTake);
 setPick(white_roller, rollerTake);
+
+
+
+var images_to_preload = ["day-button.png", "day-pushed-button.png",
+               "week-button.png", "week-pushed-button.png",
+               "month-button.png", "month-pushed-button.png",
+               "happy.png"];
+function preloadImages(images)
+  {
+  var loaded = [];
+  for(var image of images)
+    {
+    var curr_img = new Image();
+    curr_img.src = "Source/"+image;
+    loaded.push(curr_img);
+    }
+  return loaded;
+  }
+var preloaded = preloadImages(images_to_preload);
+
 </script>
   </body>
 </html>
