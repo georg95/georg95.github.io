@@ -4,12 +4,26 @@
 <head>
 <title>draw.io tutorial</title>
 <style type="text/css">
-
+.page >  input + .spoilertext {
+	display: none;
+	}
+.page >  input:checked + .spoilertext {
+	display: block;
+	}
+.spoilertext
+	{
+	background-color: #EEE;
+	padding: 10px;
+	border-style: solid;
+	border-width: 2px;
+	}
 label
 	{
 	margin: 5px;
 	margin-top: 25px;
 	padding: 10px;
+	background-color: #AAA;
+	border-radius: 10px;
 	display: inline-block;
 	font-size: 30px;
 	cursor: pointer;
