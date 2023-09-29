@@ -2,30 +2,62 @@
 <head>
 <title>WebGL</title>
 <meta charset="utf-8">
+<style>
+body 
+    {
+    -webkit-user-select: none;  /* Chrome all / Safari all */
+    -moz-user-select: none;     /* Firefox all */
+    -ms-user-select: none;      /* IE 10+ */
+    user-select: none;          /* Likely future */
+    background: #555;
+    }
+html, body
+    {
+    margin:0px;
+    padding:0px;
+    overflow: hidden;
+    }
+canvas
+    {
+    width: 800px;
+    height: 600px;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: auto;
+    margin-top: auto;
+    display: block;
+    }
+</style>
 <script type="text/javascript" src="glMatrix-0.9.5.min.js"></script>
 
 <script id="shader-fs" type="x-shader/x-fragment">
     precision mediump float;
 
-    varying vec4 vColor;
+    varying vec2 vTextureCoord;
+    uniform sampler2D uSampler;
 
     void main(void) {
-        gl_FragColor = vColor;
+        gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
     }
 </script>
 
 <script id="shader-vs" type="x-shader/x-vertex">
     attribute vec3 aVertexPosition;
-    attribute vec4 aVertexColor;
+    attribute vec2 aTextureCoord;
 
     uniform mat4 uMVMatrix;
     uniform mat4 uPMatrix;
 
-    varying vec4 vColor;
+    varying vec2 vTextureCoord;
+
 
     void main(void) {
         gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
-        vColor = aVertexColor;
+        vTextureCoord = aTextureCoord;
     }
 </script>
 <script type="text/javascript">
@@ -88,9 +120,7 @@ function getShader(gl, id)
 
 
     var shaderProgram;
-var cubeVertexPositionBuffer;
-var cubeVertexColorBuffer;
-var cubeVertexIndexBuffer;
+
 function initShaders()
     {
     var fragmentShader = getShader(gl, "shader-fs");
@@ -109,12 +139,15 @@ function initShaders()
 
     shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
     gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
-
-    shaderProgram.vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor");
-    gl.enableVertexAttribArray(shaderProgram.vertexColorAttribute);
+    
+    shaderProgram.textureCoordAttribute = gl.getAttribLocation(shaderProgram, "aTextureCoord");
+    gl.enableVertexAttribArray(shaderProgram.textureCoordAttribute);
+    //shaderProgram.vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor");
+    //gl.enableVertexAttribArray(shaderProgram.vertexColorAttribute);
 
     shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
     shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
+    shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
     }
 
 var mvMatrix = mat4.create();
@@ -139,7 +172,10 @@ function setMatrixUniforms()
     gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
     gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
     }
-
+var cubeVertexPositionBuffer;
+var cubeVertexColorBuffer;
+var cubeVertexIndexBuffer;
+var cubeVertexTextureCoordBuffer;
 function initBuffers()
     {
     cubeVertexPositionBuffer = gl.createBuffer();
@@ -184,26 +220,48 @@ function initBuffers()
     cubeVertexPositionBuffer.itemSize = 3;
     cubeVertexPositionBuffer.numItems = Math.floor(vertices.length/3);
         
-    cubeVertexColorBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexColorBuffer);
-    colors = [
-        [1.0, 0.0, 0.0, 1.0], // Front face
-        [1.0, 1.0, 0.0, 1.0], // Back face
-        [0.0, 1.0, 0.0, 1.0], // Top face
-        [1.0, 0.5, 0.5, 1.0], // Bottom face
-        [1.0, 0.0, 1.0, 1.0], // Right face
-        [0.0, 0.0, 1.0, 1.0]  // Left face
+    cubeVertexTextureCoordBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexTextureCoordBuffer);
+    var textureCoords = [
+      // Front face
+      0.0, 0.0,
+      1.0, 0.0,
+      1.0, 1.0,
+      0.0, 1.0,
+
+      // Back face
+      1.0, 0.0,
+      1.0, 1.0,
+      0.0, 1.0,
+      0.0, 0.0,
+
+      // Top face
+      0.0, 1.0,
+      0.0, 0.0,
+      1.0, 0.0,
+      1.0, 1.0,
+
+      // Bottom face
+      1.0, 1.0,
+      0.0, 1.0,
+      0.0, 0.0,
+      1.0, 0.0,
+
+      // Right face
+      1.0, 0.0,
+      1.0, 1.0,
+      0.0, 1.0,
+      0.0, 0.0,
+
+      // Left face
+      0.0, 0.0,
+      1.0, 0.0,
+      1.0, 1.0,
+      0.0, 1.0,
     ];
-    var unpackedColors = [];
-    for (var i in colors) {
-        var color = colors[i];
-        for (var j=0; j < 4; j++) {
-            unpackedColors = unpackedColors.concat(color);
-        }
-    }
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(unpackedColors), gl.STATIC_DRAW);
-    cubeVertexColorBuffer.itemSize = 4;
-    cubeVertexColorBuffer.numItems = 24;
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoords), gl.STATIC_DRAW);
+    cubeVertexTextureCoordBuffer.itemSize = 2;
+    cubeVertexTextureCoordBuffer.numItems = Math.floor(textureCoords.length/2);
 
     cubeVertexIndexBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
@@ -219,7 +277,40 @@ function initBuffers()
     cubeVertexIndexBuffer.itemSize = 1;
     cubeVertexIndexBuffer.numItems = 36;
     }
+var wallTexture;
+function initTexture()
+    {
+    wallTexture=gl.createTexture();
+    wallTexture.image = new Image();
+    wallTexture.image.onload = function() { handleLoadedTexture(wallTexture); }
+    wallTexture.image.src="texture.png";
+    }
+function handleLoadedTexture(tex)
+    {
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, tex.image);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.bindTexture(gl.TEXTURE_2D, null);
+    }
 var angle = 0;
+var rotx = 0;
+var roty = 0;
+var rotz = 0;
+
+var xpos = 0;
+var ypos = 0;
+var zpos = 0;
+
+var xsp = 0;
+var ysp = 0;
+var zsp = 0;
+
+var keys = { W:false, S:false, A:false, D:false };
+    
+var jump = false;
+
 var lab2=[
     "###############",
     "B #     #   # #",
@@ -231,46 +322,111 @@ var lab2=[
     "##### # # # # #",
     "#     # # #   #",
     "###############"];
+function toabscoords(ax, ay)
+    {
+    return {x:2*ax, y:2*ay};
+    }
+function torelcoords(ax, ay)
+    {
+    return {x:Math.round(ax/2), y:Math.round(ay/2)};
+    }
+for (var s in lab2)
+for (var i = 0; i < lab2[s].length; i++)
+        {
+        if(lab2[s][i] == "B")
+            {
+            var pos = toabscoords(i,s);
+            xpos = pos.x;
+            ypos = pos.y;
+            }
+        }
 var lab = [" |  ",
            "____",
            " |  ",
            "____"];
 function drawLabirynth()
     {
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, wallTexture);
+        gl.uniform1i(shaderProgram.samplerUniform, 0);
     for (var s in lab2)
     for (var i = 0; i < lab2[s].length; i++)
         {
         if(lab2[s][i] == "#")
             {
             mvPushMatrix();
-            mat4.translate(mvMatrix, [s*2, i*2, 0.0]);
+            mat4.translate(mvMatrix, [i*2, s*2, 0.0]);
             //mat4.rotate(mvMatrix, Math.PI/2, [0, 1, 0]);
-        gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
-        gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, cubeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+                
+            gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
+            gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, cubeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-        gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexColorBuffer);
-        gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, cubeVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
+            gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexTextureCoordBuffer);
+            gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, cubeVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
-        setMatrixUniforms();
-        gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
+            setMatrixUniforms();
+            gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 
             mvPopMatrix();
             }
         }
     }
+
+    
 function drawScene()
     {
+    if (jump) { zpos+=zsp; zsp-=0.01; }
+    if(zpos < 0) { zpos = 0; jump = false; zsp = 0; }
+    xsp=0; ysp=0;
+    if (keys.W)
+        {
+        xsp=-0.1*Math.sin(rotz);
+        ysp=-0.1*Math.cos(rotz);
+        }
+    if (keys.S)
+        {
+        xsp=0.1*Math.sin(rotz);
+        ysp=0.1*Math.cos(rotz);
+        }
+    if (keys.A)
+        {
+        xsp-=0.1*Math.sin(rotz+Math.PI/2);
+        ysp-=0.1*Math.cos(rotz+Math.PI/2);
+        }
+    if (keys.D)
+        {
+        xsp+=0.1*Math.sin(rotz+Math.PI/2);
+        ysp+=0.1*Math.cos(rotz+Math.PI/2);
+        }        
+    var deltax = 0.2;
+    var deltay = 0.2;
+    if(xsp < 0) { deltax=-0.2; }
+    if(ysp < 0) { deltay=-0.2; }
+    var pos2 = torelcoords(xpos+xsp+deltax, ypos);
+    if(lab2[pos2.y] && lab2[pos2.y][pos2.x] && lab2[pos2.y][pos2.x] != "#")
+        xpos += xsp;
+    pos2 = torelcoords(xpos, ypos+ysp+deltay);
+    if(lab2[pos2.y] && lab2[pos2.y][pos2.x] && lab2[pos2.y][pos2.x] != "#")
+        ypos += ysp;
+        
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
     mat4.identity(mvMatrix);
     angle+=0.02;
-    mat4.translate(mvMatrix, [0.0, 0.0, -20.0]);
+    mat4.translate(mvMatrix, [0.0, 0.0, -0.0]);
     
-    mat4.rotate(mvMatrix, angle/2, [0.2, 0.5, 1]);
-    mat4.translate(mvMatrix, [-lab2.length, -lab2.length, 0.0]);
+    mat4.rotate(mvMatrix, Math.PI/2, [1, 0, 0]);
+        
+    mat4.rotate(mvMatrix, rotx, [1, 0, 0]);
+    mat4.rotate(mvMatrix, roty, [0, 1, 0]);
+    mat4.rotate(mvMatrix, rotz, [0, 0, 1]);
+    mat4.translate(mvMatrix, [-xpos, -ypos, zpos]);
+    //mat4.rotate(mvMatrix, Math.PI/2, [0, 1, 0]);
+    //mat4.rotate(mvMatrix, angle/2, [0.2, 0.5, 1]);
+    //mat4.translate(mvMatrix, [-lab2.length, -lab2.length, 0.0]);
     
 
     drawLabirynth();
@@ -281,10 +437,57 @@ function drawScene()
 function webGLStart()
     {
     var canvas = document.getElementById("lesson01-canvas");
+    canvas.requestPointerLock = canvas.requestPointerLock ||
+                                canvas.mozRequestPointerLock ||
+                                canvas.webkitRequestPointerLock;
+    document.exitPointerLock =   document.exitPointerLock ||
+                                      document.mozExitPointerLock ||
+                                      document.webkitExitPointerLock;
+    canvas.requestPointerLock();
+    var isLocked = function()
+        {
+        return  canvas === document.pointerLockElement ||
+                canvas === document.mozPointerLockElement ||
+                canvas === document.webkitPointerLockElement;
+        }
+
+    canvas.addEventListener('click', function()
+        {
+        if(!isLocked()) { canvas.requestPointerLock(); }
+        else            { document.exitPointerLock();  }
+        }, false);
+    canvas.onmousemove=function(e)
+        {
+        rotz-=e.movementX/100;
+        if(rotx+e.movementY/100 < Math.PI/4 && rotx+e.movementY/100 > -Math.PI/4)
+            rotx+=e.movementY/100;
+        
+        }
+    window.onkeydown=function(e)
+        {
+        var sym = e.keyCode;
+        if(sym === 87) { keys.W = true; }
+        if(sym === 83) { keys.S = true; }
+        if(sym === 65) { keys.A = true; }
+        if(sym === 68) { keys.D = true; }
+        if(sym === 32) // SPACE
+            {
+            if(!jump) { jump = true; zsp = 0.2; }
+            }
+        }
+    window.onkeyup=function(e)
+        {
+        var sym = e.keyCode;
+        if(sym === 87) { keys.W = false; }
+        if(sym === 83) { keys.S = false; }
+        if(sym === 65) { keys.A = false; }
+        if(sym === 68) { keys.D = false; }
+        }
     initGL(canvas);
     initShaders();
     initBuffers();
-
+    initTexture();
+        
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.enable(gl.DEPTH_TEST);
 
@@ -293,6 +496,6 @@ function webGLStart()
 </script>
 </head>
 <body onload="webGLStart();">
-    <canvas id="lesson01-canvas" style="border: none;" width="500" height="500"></canvas>
+    <canvas id="lesson01-canvas" width="800" height="600" ></canvas>
 </body>
 </html>
