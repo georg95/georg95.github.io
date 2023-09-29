@@ -45,6 +45,17 @@ function AdditionalCase()
         }
     }
 AdditionalCase();
+function selchange(e)
+    {
+    if(e.options[e.selectedIndex].value == '^')
+        {
+        document.getElementById("val"+e.id.slice(3)).hidden=true;
+        }
+    else
+        {
+        document.getElementById("val"+e.id.slice(3)).hidden=false;
+        }
+    }
 function SetOptions()
     {
     opts = parseInt(document.getElementById("opts").value) || 2;
@@ -53,10 +64,11 @@ function SetOptions()
     selects.innerHTML="<br/>";
     for (var i = 0; i < opts; i++)
         {
-        selects.innerHTML+="<select id =\"sel"+i+"\">"+
+        selects.innerHTML+="<select onchange=\"selchange(this);\" id =\"sel"+i+"\">"+
                             "<option value='+'>Прибавь</option>"+
                             "<option value='*'>Умножь на</option>"+
-                            "<option value='^'>Увеличь разряд числа на</option></select>"+
+                            "<option value='^'>Возведи в квадрат</option>"+
+                            "<option value='_'>Увеличь разряд числа на</option></select>"+
                             "<input type=\"number\" value="+
                             "\"2\" id=val"+i+"><br/>";
         }
@@ -86,12 +98,13 @@ for(;i<opers;++i)
     var e = document.getElementById("sel"+i);
     allopers[i].oper=e.options[e.selectedIndex].value;
     allopers[i].value=parseInt(document.getElementById("val"+i).value);
-	if (allopers[i].value == NaN || (allopers[i].oper != '+' && allopers[i].oper != '*' && allopers[i].oper != '^'))
+	if(document.getElementById("val"+i).hidden) { allopers[i].value=2; }
+    if (allopers[i].value == NaN)
 		{ i--; alert("Неправильный формат"); return; }
-	console.log(allopers[i]);
+	//console.log(allopers[i]);
     }
 
-console.log("opers = "+opers+"; from "+start+" to "+finish);
+//console.log("opers = "+opers+"; from "+start+" to "+finish);
     
 var thesolution = "РЕШЕНИЕ:<br/>";
 thesolution+="способов ("+finish+") = 1<br/>";
@@ -107,7 +120,8 @@ for (var k = finish-1; k >= start; --k)
 		var lookpoint = 0;
 		if (allopers[i].oper == '+') { lookpoint = k+allopers[i].value; }
 		if (allopers[i].oper == '*') { lookpoint = k*allopers[i].value; }
-        if (allopers[i].oper == '^')
+        if (allopers[i].oper == '^') { lookpoint = k*k; }
+        if (allopers[i].oper == '_')
             {
             var kk = ""+k;
             console.log(kk);
