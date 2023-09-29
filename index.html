@@ -12,79 +12,12 @@
 <style media="screen">
 body
 	{
-	background: #2dbc64;
+	background: #AAA;
 	font-family: Arial;
 	}
-html,body,div
+figure
 	{
-	margin: 0;
-	}
-.box
-	{
-	transition: all 0.5s ease-in-out;
-	}
-.spoiler
-	{
-	text-align: center;
-	}
-.spoiler >  input + .box
-	{
-	display: none;
-	}
-.spoiler >  input:checked + .box
-	{
-	display: block;
-	}
-input[type="radio"]
-	{
-	display: none;
-	}
-ul
-	{
-	padding: 0;
-	margin: 5px 20px;
-	list-style-type: none;
-	list-style-position: outside;
-	}
-li
-	{
-	margin: 0px;
-	}
-
-a,label
-	{
-	background-color: #7BD;
-	border: 1px dashed #59B;
-	border-collapse: collapse;
-	}
-label
-	{
-	max-width: 12cm;
-	}
-a
-	{
-	max-width: 10cm;
-	}
-a
-	{
-	font-family: Arial;
-	text-decoration: none;
-	color: black;
 	display: inline-block;
-	width: 100%;
-	padding: 0.5cm 0px;
- 	}
-label
-	{
-	cursor: pointer;
-	box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  -webkit-box-sizing: border-box;
-	width: 100%;
-	padding: 0.7cm 0px;
-	display: inline-block;
-	vertical-align: middle;
-	text-align: center;
 	}
 </style>
 </head>
@@ -92,42 +25,60 @@ label
 		<script>
 		//setTimeout(function() { location.reload() }, 5000);
 		</script>
-		<form>
+		<header>
+			<h1>Some web experiments here</h1>
+		</header>
+		<a href='https://georgsh.github.io/xmastree.html'>
+			<figure>
+				<img src='icons/xmastree.png' alt='xmasASCII'/>
+				<figcaption>procedural generated ASCII XMas tree</figcaption>
+			</figure>
+		</a>
+		<a href='https://georgsh.github.io/uum32'>
+			<figure>
+		  	<img src='icons/asm.png'/>
+		  	<figcaption>UUM32 assembler+VM</figcaption>
+			</figure>
+		</a>
+		<a href='webgl/cube.html'>
+			<figure>
+				<img src='icons/labyrinth.png'/>
+				<figcaption>WebGL labyrinth demo</figcaption>
+			</figure>
+		</a>
+		<a href='mobileapp/gyrotest.html'>
+			<figure>
+				<img src='icons/accel_test.png'/>
+				<figcaption>accelerometer test</figcaption>
+			</figure>
+		</a>
+		<a href='fourier/plot.html'>
+			<figure>
+				<img src='icons/fourier.png'/>
+				<figcaption>fourier series</figcaption>
+			</figure>
+		</a>
+		<a href='https://georgsh.github.io/build_and_defend'>
+			<figure>
+				<img src='icons/game1.png'/>
+				<figcaption>tower defence-like game</figcaption>
+			</figure>
+		</a>
+		<a href='trollgame/trollgame.html'>
+			<figure>
+				<img src='icons/game2.png'/>
+				<figcaption>arcade game(don't press space)</figcaption>
+			</figure>
+		</a>
+		<a href='bubbles.html'>
+			<figure>
+				<img src='icons/game3.png'/>
+				<figcaption>classic pop bubbles game</figcaption>
+			</figure>
+		</a>
+
 		<div class="spoiler">
-		     <label for="android">Android-игры</label><input type="radio" name="group1" id="android">
-		     <div class="box">
-					 <ul>
-						 <li><a href="https://github.com/georgsh/lines">Lines Game [SOURCE]</a></li>
-						 <li><a href="https://github.com/georgsh/lines/releases/download/v1.0/Lines.apk">Lines Game [APK]</a></li>
-					 </ul>
-		     </div>
-		</div>
-		<div class="spoiler">
-		     <label for="webdemo">web-демки</label><input type="radio" name="group1" id="webdemo">
-		     <div class="box">
-					 <ul>
-						 <li><a href="xmastree.html">x-mas tree generator</a></li>
-						 <li><a href="cube.html">Software rendered cube(pixel by pixel)</a></li>
-						 <li><a href="webgl/cube.html">webgl demo(not ready yet)</a></li>
-						 <li><a href="mobileapp/gyrotest.html">Mobile web app test</a></li>
-						 <li><a href="fourier/plot.html">Fourier series approximation</a></li>
-					 </ul>
-		     </div>
-		</div>
-		<div class="spoiler">
-		     <label for="jsgames">JS-игры</label><input type="radio" name="group1" id="jsgames">
-		     <div class="box">
-					 <ul>
-						 <li><a href="https://georgsh.github.io/build_and_defend">Build&amp;Defend game</a></li>
-						 <li><a href="trollgame/trollgame.html">Simple game about miner and dynamite</a></li>
-						 <li><a href="bubbles.html">Bubbles game</a></li>
-						 <li><a href="mobileapp/gyrotest.html">Mobile web app test</a></li>
-						 <li><a href="fourier/plot.html">Fourier series approximation</a></li>
-					 </ul>
-		     </div>
-		</div>
-		<div class="spoiler">
-				 <label for="jsutils">JS-утилиты</label><input type="radio" name="group1" id="jsutils">
+				 <label for="jsutils">Other stuff</label>
 				 <div class="box">
 					 <ul>
 						 <li><a href="solver.html">Калькулятор для задачи ЕГЭ по информатике(номер 22)</a></li>
@@ -135,29 +86,11 @@ label
 						 <li><a href="paint/index.html">Simple paint</a></li>
 						 <li><a href="baldabot/index.html">Balda game helper</a></li>
 						 <li><a href="https://georgsh.github.io/NeedMeKnow">Определи ценность языка программирования!</a></li>
-						 <li><a href="fourier/plot.html">Fourier series approximation</a></li>
+						 <li><a href="https://georgsh.github.io/githubstat">My github statistics</a></li>
+						 <li><a href="https://github.com/georgsh/lines">Lines Game [SOURCE]</a></li>
+						 <li><a href="https://github.com/georgsh/lines/releases/download/v1.0/Lines.apk">Lines Game [APK]</a></li>
 					 </ul>
 				 </div>
 		</div>
-		<div class="spoiler">
-				 <label for="uum32">UUM32 emulator</label><input type="radio" name="group1" id="uum32">
-				 <div class="box">
-					 <ul>
-						 <li><a href="https://georgsh.github.io/uum32">UUM32 emulator</a></li>
-					 </ul>
-				 </div>
-		</div>
-		<div class="spoiler">
-				 <label for="ghstat">My github statistics(bytes per language)</label><input type="radio" name="group1" id="ghstat">
-				 <div class="box">
-					 <ul>
-						 <li><a href="https://georgsh.github.io/githubstat">My github statistics(bytes per language)</a></li>
-					 </ul>
-				 </div>
-		</div>
-		<form>
-		<hr>
-		<span id="end"></span>
-
     </body>
 </html>
