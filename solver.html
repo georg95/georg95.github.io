@@ -71,7 +71,7 @@ finish=document.getElementById("finish").value;
 
 var included = document.getElementById("included").value;
 var excluded = document.getElementById("excluded").value;
-    
+if(!additional) { included=undefined; excluded=undefined; }
 start=parseInt(start);
 finish=parseInt(finish);
 included=parseInt(included);
