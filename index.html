@@ -1,32 +1,146 @@
 <!doctype html>
 <html>
 <head>
-<meta charset="utf-8"/>
+
+<meta charset="utf-8"/> <!-- Some cool features -->
+<meta name="theme-color" content="#279140">
 <meta name="viewport" content="width=400,user-scalable=false"/>
+<link rel="icon" sizes="192x192" href="/highres.png">
 <link rel="shortcut icon" type="image/png" href="/favicon.png">
+
 <title>Projects site</title>
-<link rel="stylesheet" href="styles.css">
+<style media="screen">
+body
+	{
+	background: #2dbc64;
+	font-family: Arial;
+	}
+html,body,div
+	{
+	margin: 0;
+	}
+.box
+	{
+	transition: all 0.5s ease-in-out;
+	}
+.spoiler >  input + .box
+	{
+	display: none;
+	}
+.spoiler >  input:checked + .box
+	{
+	display: block;
+	}
+input[type="checkbox"]
+	{
+	display: none;
+	}
+ul
+	{
+	padding: 0;
+	margin: 5px 20px;
+	list-style-type: none;
+	list-style-position: outside;
+	}
+li
+	{
+	margin: 0px;
+	}
+a,label
+	{
+	background-color: #7BD;
+	border: 1px dashed #59B;
+	border-collapse: collapse;
+	}
+a
+	{
+	font-family: Arial;
+	text-decoration: none;
+	color: black;
+	display: inline-block;
+	width: 90%;
+	padding: 25px 5%;
+ 	}
+label
+	{
+	box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+	width: 100%;
+	padding: 12% 0px;
+	display: inline-block;
+	vertical-align: middle;
+	text-align: center;
+	}
+</style>
 </head>
 	<body>
-        <div class="lnk"><a href="https://github.com/georgsh/lines">Lines Game (android)[SOURCE]</a>
-        <a href="https://github.com/georgsh/lines/releases/download/v1.0/Lines.apk">[APK]</a></div>
-        <div class="lnk"><a href="https://georgsh.github.io/build_and_defend">Build&amp;Defend game</a>
-        (<a href="https://vk.com/app5203189">VK app</a>)</div>
-        <div class="lnk"><a href="https://georgsh.github.io/uum32">UUM32 emulator</a></div>
-        <div class="lnk"><a href="cube.html">Software rendered cube(pixel by pixel)</a></div>
-        <div class="lnk"><a href="solver.html">Калькулятор для задачи ЕГЭ по информатике(номер 22)</a></div>
-        <div class="lnk"><a href="bubbles.html">Bubbles game</a></div>
-        <div class="lnk"><a href="fourier/plot.html">Fourier series approximation</a></div>
-        <div class="lnk"><a href="xmastree.html">x-mas tree generator</a></div>
-	<div class="lnk"><a href="trollgame/trollgame.html">Simple game about miner and dynamite</a>
-        (<a href="https://vk.com/app5208779">VK app</a>)</div>
-	<div class="lnk"><a href="webgl/cube.html">webgl demo(not ready yet)</a></div>
-	<div class="lnk"><a href="baldabot/index.html">Balda game helper</a></div>
-        <div class="lnk"><a href="paint/index.html">Simple paint</a></div>
-        <div class="lnk"><a href="drawio_help.html">Draw.io help</a></div>
-        <div class="lnk"><a href="mobileapp/gyrotest.html">Mobile web app test</a></div>
-        <div class="lnk"><a href="https://georgsh.github.io/NeedMeKnow">Определи ценность языка программирования!</a></div>
-        <div class="lnk"><a href="https://georgsh.github.io/githubstat">My github statistics(bytes per language)</a></div>
-        <div class="lnk"><a href="https://georgsh.github.io/angularApp">angular.js test app</a></div>
+		<script>
+		//setTimeout(function() { location.reload() }, 5000);
+		</script>
+		<div class="spoiler">
+		     <label for="android">Android-игры</label><input type="checkbox" id="android">
+		     <div class="box">
+					 <ul>
+						 <li><a href="https://github.com/georgsh/lines">Lines Game [SOURCE]</a></li>
+						 <li><a href="https://github.com/georgsh/lines/releases/download/v1.0/Lines.apk">Lines Game [APK]</a></li>
+					 </ul>
+		     </div>
+		</div>
+		<div class="spoiler">
+		     <label for="webdemo">web-демки</label><input type="checkbox" id="webdemo">
+		     <div class="box">
+					 <ul>
+						 <li><a href="xmastree.html">x-mas tree generator</a></li>
+						 <li><a href="cube.html">Software rendered cube(pixel by pixel)</a></li>
+						 <li><a href="webgl/cube.html">webgl demo(not ready yet)</a></li>
+						 <li><a href="mobileapp/gyrotest.html">Mobile web app test</a></li>
+						 <li><a href="fourier/plot.html">Fourier series approximation</a></li>
+					 </ul>
+		     </div>
+		</div>
+		<div class="spoiler">
+		     <label for="jsgames">JS-игры</label><input type="checkbox" id="jsgames">
+		     <div class="box">
+					 <ul>
+						 <li><a href="https://georgsh.github.io/build_and_defend">Build&amp;Defend game</a></li>
+						 <li><a href="trollgame/trollgame.html">Simple game about miner and dynamite</a></li>
+						 <li><a href="bubbles.html">Bubbles game</a></li>
+						 <li><a href="mobileapp/gyrotest.html">Mobile web app test</a></li>
+						 <li><a href="fourier/plot.html">Fourier series approximation</a></li>
+					 </ul>
+		     </div>
+		</div>
+		<div class="spoiler">
+				 <label for="jsutils">JS-утилиты</label><input type="checkbox" id="jsutils">
+				 <div class="box">
+					 <ul>
+						 <li><a href="solver.html">Калькулятор для задачи ЕГЭ по информатике(номер 22)</a></li>
+						 <li><a href="paint/index.html">Simple paint</a></li>
+						 <li><a href="baldabot/index.html">Balda game helper</a></li>
+						 <li><a href="https://georgsh.github.io/NeedMeKnow">Определи ценность языка программирования!</a></li>
+						 <li><a href="fourier/plot.html">Fourier series approximation</a></li>
+					 </ul>
+				 </div>
+		</div>
+		<div class="spoiler">
+				 <label for="uum32">UUM32 emulator</label><input type="checkbox" id="uum32">
+				 <div class="box">
+					 <ul>
+						 <li><a href="https://georgsh.github.io/uum32">UUM32 emulator</a></li>
+					 </ul>
+				 </div>
+		</div>
+		<div class="spoiler">
+				 <label for="ghstat">My github statistics(bytes per language)</label><input type="checkbox" id="ghstat">
+				 <div class="box">
+					 <ul>
+						 <li><a href="https://georgsh.github.io/githubstat">My github statistics(bytes per language)</a></li>
+					 </ul>
+				 </div>
+		</div>
+		<hr>
+		<span id="end"></span>
+
     </body>
 </html>
