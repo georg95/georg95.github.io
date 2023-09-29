@@ -244,7 +244,7 @@ white_roller.onmousedown = function(e)
     };
   return false; // prevent default
   }
-function putPill(x, y)
+function pillPutInteract(x, y)
   {
   if(x > man.offsetLeft &&
       x < man.offsetLeft+man.clientWidth &&
@@ -268,24 +268,38 @@ function pillTake(e)
   document.body.ontouchup = pillPut;
   return false; // prevent default
   }
-function pillMove(e)
+function getEventCoords(e)
   {
   e = e || window.event;
-  var finger_x = 0 || e.pageX || e.clientX;
-  var finger_y = 0 || e.pageY || e.clientY;
+  var x = e.pageX || e.clientX;
+  var y = e.pageY || e.clientY;
+  if(e.touches && e.touches[0])
+    {
+    x = e.touches[0].pageX;
+    y = e.touches[0].pageY;
+    }
+  return [x, y];
+  }
+function pillMove(e)
+  {
+  var finger_pos = getEventCoords(e);
+  var finger_x = finger_pos[0];
+  var finger_y = finger_pos[1];
 
   pill.style.left = finger_x+"px";
   pill.style.top = finger_y+"px";
+  return false;
   };
 function pillPut(e)
   {
-  e = e || window.event;
-  var finger_x = 0 || e.pageX || e.clientX;
-  var finger_y = 0 || e.pageY || e.clientY;
+  var finger_pos = getEventCoords(e);
+  var finger_x = finger_pos[0];
+  var finger_y = finger_pos[1];
 
-  putPill(finger_x, finger_y);
+  pillPutInteract(finger_x, finger_y);
   document.body.onmousemove = document.body.onmouseup = null;
   document.body.ontouchmove = document.body.ontouchup = null;
+  return false;
   };
 pill.onmousedown = pillTake;
 pill.ontouchstart = pillTake;
