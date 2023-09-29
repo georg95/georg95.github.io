@@ -115,8 +115,9 @@ function binsearch(left, right, pos, letter)
 
 function promptLetter(e)
     {
-    console.log("clicked "+this.x+", "+this.y);
+    //console.log("clicked "+this.x+", "+this.y);
     var letter = prompt("input letter", 'б');
+    if (!letter) { return; }
     if(letter.length === 1 && alphabet.indexOf(letter) > -1)
         { setLetter(this.x, this.y, letter); }
     else { setLetter(this.x, this.y, undefined); }
@@ -275,7 +276,7 @@ function clearHighlight()
     for(var y = 0; y < table.childNodes.length; y++)
     for(var x = 0; x < table.childNodes[y].childNodes.length; x++)
         {
-        table.childNodes[y].childNodes[x].style="";
+        table.childNodes[y].childNodes[x].setAttribute("style", "");
         }
     }
     
@@ -287,7 +288,7 @@ function showword(e)
     var wordinfo = this.stack[parseInt(e.target.value)];
     selectedWord = wordinfo;
     var verticles = wordinfo.pos;
-    console.log(wordinfo.word);
+    //console.log(wordinfo.word);
     var table = document.getElementById("gametable");
     for(var i in verticles)
         {
@@ -296,7 +297,7 @@ function showword(e)
             {
             table.childNodes[cv.y].childNodes[cv.x].innerHTML="<p>"+wordinfo.char+"</p>";
             }
-        table.childNodes[cv.y].childNodes[cv.x].style="background:green";
+        table.childNodes[cv.y].childNodes[cv.x].setAttribute("style","background:green");
         //console.log(cv);
         }
     }
@@ -322,8 +323,8 @@ function findAllWords()
         {
         findWords(x,y,stack);
         }
-    console.log("ALL WORDS:");
-    stack.sort(function(a,b) { return a.word.length<b.word.length; });
+    //console.log("ALL WORDS:");
+    stack.sort(function(a,b) { return b.word.length-a.word.length; });
     document.getElementById("answers").innerHTML="";
     var answers = document.createElement("select");
     answers.multiple="";
@@ -368,7 +369,7 @@ function acceptChoice()
 function newGame(w)
     {
     var word;
-    if (!w) { word = prompt("Please input initial word", "слово"); }
+    if (!w) { word = prompt("Please input initial word", "слово"); if(!word) { return; } }
     else    { word = w; }
     if (word.length > 11) { alert("Word is too long"); return; }
     for(var i in word)
