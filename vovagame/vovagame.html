@@ -296,7 +296,15 @@ function DrawLoop()
 
         timer--;
         }
-    else
+    updateEntities(dynamites);
+    updateEntities(effects);
+    updateEntities(enemies);
+    trolley.update();
+    trolley.draw();
+    drawEntities(enemies);
+    drawEntities(dynamites);
+    drawEntities(effects);
+    if(endgame)
         {
         area.fillStyle="#000";
         var statsx = 300;
@@ -309,14 +317,6 @@ function DrawLoop()
         area.fillText("GAME OVER", canvas.width/2, canvas.height/2-30);
         area.fillText("TROLLS KILLED: "+killed, canvas.width/2, canvas.height/2);
         }
-    updateEntities(dynamites);
-    updateEntities(effects);
-    updateEntities(enemies);
-    trolley.update();
-    trolley.draw();
-    drawEntities(enemies);
-    drawEntities(dynamites);
-    drawEntities(effects);
     DrawTimer();
     if(timer == 0) { endgame=true; }
     window.requestAnimationFrame(DrawLoop);
