@@ -9,19 +9,21 @@ function assert(testcase, result, accur)
     console.error('assertion failed, expected ',result, ', given ', testcase);
     }
   }
+  function sqr(x) { return x*x; }
+  function testfunc(vert)
+    {
+    var x = vert[0],
+        y = vert[1];
+    return 100*sqr(y-sqr(x))+sqr(1-x);
+    }
 function caclulate()
   {
   document.getElementById("answer").innerHTML = "";
   var edge = 2;
   var simplex = getInitialSimplex([0,0], 2);
   testSimplex(simplex, 2);
-  function sqr(x) { return x*x; }
-  NMA(/*simplex*/[[10,9],[10,-2],[21,1]], function(vert)
-    {
-    var x = vert[0],
-        y = vert[1];
-    return 100*sqr(y-sqr(x))+sqr(1-x);
-    });
+
+  NMA(/*simplex*/[[10,9],[10,-2],[21,1]], testfunc);
   }
 function getDistance(vert1, vert2)
   {
@@ -103,15 +105,90 @@ function NMA(simplex, func, reflection=1.0, compression=0.5, extension=2.0)
     {
     return { fvalue: func(verticle), 'verticle':verticle };
     });
-  var N = points.length-1;
+  console.log(JSON.stringify(points));
+  for(var i = 0; i < 50; i++)
+    {
+    replacePointAndShrink(points, func, reflection, compression, extension);
+    console.log(JSON.stringify(points));
+    }
+  }
+
+function replacePointAndShrink(points, func, reflection, compression, extension)
+  {
   sortPoints(points);
+  var N = points.length-1;
   var xMax1 = points[N],
-      xMax2 = points[N-1],
       xMin  = points[0],
       xCenter = getCenter(points.slice(0,-1));
-  var reflectPoint = getReflectPoint(xMax1.verticle, xCenter, reflection, func);
-
-  console.dir(points);
   console.dir(xCenter);
-  console.dir(reflectPoint);
+  var reflectPoint = getReflectPoint(xMax1.verticle, xCenter, reflection, func);
+  if(reflectPoint.fvalue < xMin.fvalue)
+    {
+    tryExtend(points, extension, xCenter, reflectPoint, func);
+    }
+  else
+    {
+    var optimal = replacePointsOptimal(points, reflectPoint);
+    if (!optimal) { simplexCompress(points, compression, xCenter, func); }
+    }
+  }
+
+function tryExtend(points, extension, xCenter, reflectPoint, func)
+  {
+  var N = points.length-1;
+  var xMin = points[0];
+  var extendedPoint = getReflectPoint(reflectPoint.verticle, xCenter, -extension, func);
+
+  points[N] = (extendedPoint.fvalue < xMin.fvalue) ? extendedPoint : reflectPoint;
+  }
+
+function replacePointsOptimal(points, reflectPoint)
+  {
+  var N = points.length-1;
+  var xMax1 = points[N],
+      xMax2 = points[N-1];
+  if(reflectPoint.fvalue < xMax2.fvalue)
+    {
+    points[N] = reflectPoint;
+    return true;
+    }
+  if(reflectPoint.fvalue < xMax1.fvalue)
+    {
+    [points[N], reflectPoint] = [reflectPoint, points[N]];
+    }
+  return false;
+  }
+
+function simplexCompress(points, compression, xCenter, func)
+  {
+  var N = points.length-1;
+  var xMax1 = points[N],
+      xMax2 = points[N-1];
+  var comressedPoint = getReflectPoint(xCenter, xMax1.verticle, compression, func);
+  if(comressedPoint.fvalue < xMax1.fvalue)
+    {
+    [points[N], comressedPoint] = [comressedPoint, points[N]];
+    }
+  else
+    {
+    globalCompress(points, compression);
+    }
+  }
+
+function globalCompress(points, compression)
+  {
+  var xMin = points[0],
+      xMax = points[points.length-1];
+  for (var point of points)
+    {
+    shrinkPointTo(point, xMin, compression);
+    }
+  }
+function shrinkPointTo(point, toPoint, compression)
+  {
+  for(var i = 0; i < point.verticle.length; i++)
+    {
+    point.verticle[i] = toPoint.verticle[i]+
+                        (point.verticle[i]-toPoint.verticle[i])*compression;
+    }
   }
