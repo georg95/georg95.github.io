@@ -158,7 +158,8 @@ function ViewCoords()
     accelcoords.innerHTML += 'y='+y.toFixed(1)+'; ';
     accelcoords.innerHTML += 'z='+z.toFixed(1);
 	appinfo.innerHTML="Width: "+document.body.clientWidth+"; ";
-	appinfo.innerHTML+="Height: "+document.body.clientHeight;
+	appinfo.innerHTML+="Height: "+document.body.clientHeight+"; ";
+	appinfo.innerHTML+="<br>position: ("+sx.toFixed(1)+", "+sy.toFixed(1)+")";
 	}
 
 setInterval(UpdateCoords, 20);
