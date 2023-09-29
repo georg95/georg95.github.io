@@ -458,9 +458,9 @@ function webGLStart()
         }, false);
     canvas.onmousemove=function(e)
         {
-        rotz-=e.movementX/200;
-        if(rotx+e.movementY/200 < Math.PI/4 && rotx+e.movementY/200 > -Math.PI/4)
-            rotx+=e.movementY/200;
+        rotz-=e.movementX/400;
+        if(rotx+e.movementY/400 < Math.PI/4 && rotx+e.movementY/400 > -Math.PI/4)
+            rotx+=e.movementY/400;
         
         }
     window.onkeydown=function(e)
