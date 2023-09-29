@@ -33,6 +33,7 @@ function chtransparent(range)
     }
 canvas.onmousedown=function(e)
     {
+    e.preventDefault();
     var mx = e.pageX-canvas.offsetLeft;
     var my = e.pageY-canvas.offsetTop;
 
@@ -43,6 +44,7 @@ canvas.onmousedown=function(e)
     }
 document.onmouseup=function(e)
     {
+    e.preventDefault();
     area.putImageData(mainlayer,0,0);
     area.globalAlpha=1-curtransparency/100;
     drawLine();
@@ -66,7 +68,7 @@ function drawLine()
         }
     area.stroke();
     }
-document.onmousemove=funvar canvas, area;
+var canvas, area;
 canvas = document.getElementById("canv");
 area = canvas.getContext("2d");
 var mainlayer;
@@ -119,6 +121,7 @@ document.onmouseup=function(e)
     clicked=false;
     curchange=[];
     }
+
 function drawLine()
     {
     area.strokeStyle = curcolor;
@@ -137,6 +140,7 @@ function drawLine()
 document.onmousemove=function(e)
     {
     if(!clicked) { return; }
+    e.preventDefault();
     var mx = e.pageX-canvas.offsetLeft;
     var my = e.pageY-canvas.offsetTop;
     area.putImageData(mainlayer,0,0);
