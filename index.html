@@ -4,7 +4,7 @@
 
 <meta charset="utf-8"/> <!-- Some cool features -->
 <meta name="theme-color" content="#279140">
-<meta name="viewport" content="width=400,user-scalable=false"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=false"/>
 <link rel="icon" sizes="192x192" href="/highres.png">
 <link rel="shortcut icon" type="image/png" href="/favicon.png">
 
@@ -23,6 +23,10 @@ html,body,div
 	{
 	transition: all 0.5s ease-in-out;
 	}
+.spoiler
+	{
+	text-align: center;
+	}
 .spoiler >  input + .box
 	{
 	display: none;
@@ -31,7 +35,7 @@ html,body,div
 	{
 	display: block;
 	}
-input[type="checkbox"]
+input[type="radio"]
 	{
 	display: none;
 	}
@@ -46,11 +50,20 @@ li
 	{
 	margin: 0px;
 	}
+
 a,label
 	{
 	background-color: #7BD;
 	border: 1px dashed #59B;
 	border-collapse: collapse;
+	}
+label
+	{
+	max-width: 12cm;
+	}
+a
+	{
+	max-width: 10cm;
 	}
 a
 	{
@@ -58,16 +71,17 @@ a
 	text-decoration: none;
 	color: black;
 	display: inline-block;
-	width: 90%;
-	padding: 25px 5%;
+	width: 100%;
+	padding: 0.5cm 0px;
  	}
 label
 	{
+	cursor: pointer;
 	box-sizing: border-box;
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
 	width: 100%;
-	padding: 12% 0px;
+	padding: 0.7cm 0px;
 	display: inline-block;
 	vertical-align: middle;
 	text-align: center;
@@ -78,8 +92,9 @@ label
 		<script>
 		//setTimeout(function() { location.reload() }, 5000);
 		</script>
+		<form>
 		<div class="spoiler">
-		     <label for="android">Android-игры</label><input type="checkbox" id="android">
+		     <label for="android">Android-игры</label><input type="radio" name="group1" id="android">
 		     <div class="box">
 					 <ul>
 						 <li><a href="https://github.com/georgsh/lines">Lines Game [SOURCE]</a></li>
@@ -88,7 +103,7 @@ label
 		     </div>
 		</div>
 		<div class="spoiler">
-		     <label for="webdemo">web-демки</label><input type="checkbox" id="webdemo">
+		     <label for="webdemo">web-демки</label><input type="radio" name="group1" id="webdemo">
 		     <div class="box">
 					 <ul>
 						 <li><a href="xmastree.html">x-mas tree generator</a></li>
@@ -100,7 +115,7 @@ label
 		     </div>
 		</div>
 		<div class="spoiler">
-		     <label for="jsgames">JS-игры</label><input type="checkbox" id="jsgames">
+		     <label for="jsgames">JS-игры</label><input type="radio" name="group1" id="jsgames">
 		     <div class="box">
 					 <ul>
 						 <li><a href="https://georgsh.github.io/build_and_defend">Build&amp;Defend game</a></li>
@@ -112,7 +127,7 @@ label
 		     </div>
 		</div>
 		<div class="spoiler">
-				 <label for="jsutils">JS-утилиты</label><input type="checkbox" id="jsutils">
+				 <label for="jsutils">JS-утилиты</label><input type="radio" name="group1" id="jsutils">
 				 <div class="box">
 					 <ul>
 						 <li><a href="solver.html">Калькулятор для задачи ЕГЭ по информатике(номер 22)</a></li>
@@ -124,7 +139,7 @@ label
 				 </div>
 		</div>
 		<div class="spoiler">
-				 <label for="uum32">UUM32 emulator</label><input type="checkbox" id="uum32">
+				 <label for="uum32">UUM32 emulator</label><input type="radio" name="group1" id="uum32">
 				 <div class="box">
 					 <ul>
 						 <li><a href="https://georgsh.github.io/uum32">UUM32 emulator</a></li>
@@ -132,13 +147,14 @@ label
 				 </div>
 		</div>
 		<div class="spoiler">
-				 <label for="ghstat">My github statistics(bytes per language)</label><input type="checkbox" id="ghstat">
+				 <label for="ghstat">My github statistics(bytes per language)</label><input type="radio" name="group1" id="ghstat">
 				 <div class="box">
 					 <ul>
 						 <li><a href="https://georgsh.github.io/githubstat">My github statistics(bytes per language)</a></li>
 					 </ul>
 				 </div>
 		</div>
+		<form>
 		<hr>
 		<span id="end"></span>
 
