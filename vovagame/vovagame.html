@@ -6,7 +6,7 @@
 	
 </head>
 	<body onload="start()">
-		<canvas width="640" height="480" id="game"></canvas>
+		<canvas width="800" height="600" id="game"></canvas>
 <script>
 "use strict"
 var canvas = document.getElementById('game');
@@ -21,12 +21,17 @@ var dynamiteimg = new Image();
 dynamiteimg.src="dynamite.png";
 var manimg = new Image();
 manimg.src="man.png";
+var enemyimg = new Image();
+enemyimg.src="enemy.png";
 var man = {sizex:150/2, sizey:200/2,handangle:0};
 var mx = 0; var my = 0;
+var dx=0;
 var clicked = false;
+var worldx = 0;
 
 var dynamites=[];
 var effects=[];
+var enemies=[];
 function effectBigBoom(t, sx, sy, radius)
     {
     this.time = t;
@@ -63,7 +68,11 @@ dynamite.prototype.sizey=50;
 dynamite.prototype.update = function()
     {
     this.t+=1;
-    if(this.t>=100) { addEntity(effects, new effectBigBoom(50, this.x, this.y, 100)); return false; }
+    if(this.t>=100)
+        {
+        AoeDamage(this.x, this.y, 100, 100);
+        addEntity(effects, new effectBigBoom(50, this.x, this.y, 100)); return false;
+        }
     this.x=this.sx+this.dx*this.t/100;
     this.y=this.sy+this.dy*this.t/100;
     this.angle+=0.2;
@@ -107,7 +116,7 @@ man.update=function()
     {
     this.handangle-=0.1;
     }
-var trolley = {x:300,y:200,vx:0,vy:0,sizex:300/2,sizey:200/2};
+var trolley = {x:300,y:200,vx:4,vy:0,sizex:300/2,sizey:200/2};
 trolley.update=function()
     {
     this.x+=this.vx;
@@ -131,19 +140,80 @@ function drawBg(dx)
     if(dx != canvas.width) area.drawImage(bgimg,dxs,0,800-dxs, 600, 0,0, canvas.width-dx,canvas.height);
     if(dx != 0) area.drawImage(bgimg,0,0,dxs, 600, canvas.width-dx,0, dx,canvas.height);
     }
-var dx=0;
+function Enemy(x,y,vx,vy)
+    {
+    this.x=x;
+    this.y=y;
+    this.vx=vx;
+    this.vy=vy;
+    this.step=0;
+    this.hp = 100;
+    }
+Enemy.prototype.maxhp = 100;
+Enemy.prototype.size = 64;
+Enemy.prototype.hit=function(dmg)
+    {
+    this.hp-=dmg;
+    if(this.hp<0) { this.hp = 0; }
+    }
+Enemy.prototype.update = function()
+    {
+    if(this.hp<=0) { return false; }
+    this.step++;
+    if(this.step>20) { this.step = 0; }
+    this.x+=this.vx;
+    this.y+=this.vy;
+    if(this.x<0){this.x=0; this.vx=-this.vx;}
+    if(this.y<0){this.y=0; this.vy=-this.vy;}
+    if(this.x>canvas.width) {this.x=canvas.width;  this.vx=-this.vx;}
+    if(this.y>canvas.height){this.y=canvas.height; this.vy=-this.vy;}
+    return true;
+    }
+Enemy.prototype.draw = function()
+    {
+    area.fillStyle = "#0F0";
+    area.translate(this.x, this.y);
+    area.fillRect(-this.size/2, -this.size/2, Math.round(this.size*this.hp/this.maxhp), 4);
+    if(this.step > 10) { area.scale(-1,1); }
+    area.drawImage(enemyimg, -this.size/2, -this.size/2, this.size, this.size);
+    area.setTransform(1, 0, 0, 1, 0, 0);
+    }
+function AoeDamage(x, y, radius, dmg)
+    {
+    for(var i in enemies)
+        {
+        var dst = Math.sqrt((enemies[i].x-x)*(enemies[i].x-x)+(enemies[i].y-y)*(enemies[i].y-y));
+        if (dst < radius)
+            {
+            enemies[i].hit(dmg*(radius-dst)/radius);
+            }
+        }
+    }
+function AddEnemies()
+    {
+    if(Math.random()<0.01)
+        {
+        var en = new Enemy(Math.random()*canvas.width, canvas.height,
+                           -1.5+Math.random()*3,-1-Math.random()*2)
+        addEntity(enemies, en);
+        }
+    }
 function DrawLoop()
     {
     //area.fillStyle="#FFF";
-    dx-=2;
+    //worldx-=2;
+    //dx-=2;
     if(dx < 0) { dx+=canvas.width; }
     if(dx >= canvas.width) { dx-=canvas.width; }
     drawBg(dx);
     if(clicked) { addEntity(dynamites, new dynamite(trolley.x, trolley.y, mx, my)); }
     updateEntities(dynamites);
     updateEntities(effects);
+    AddEnemies();
+    updateEntities(enemies);
     trolley.update();
     trolley.draw();
+    drawEntities(enemies);
     drawEntities(dynamites);
     drawEntities(effects);
     window.requestAnimationFrame(DrawLoop);
