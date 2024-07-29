@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hamster Kombat bike keygen</title>
+</head>
+<body>
+    <h2 id="status"><a href="https://georg95.github.io/hamster-bike-keygen/script.user.js">Install</a></h2>
+    <script>
+        const status = document.querySelector('#status')
+        function setStatus(text) {
+            status.innerHTML = text
+        }
+        const supportedLangs = ['ru', 'en']
+        let lang = navigator.language.split('-')[0]
+        if (!supportedLangs.includes(lang)) {
+            lang = 'en'
+        }
+        const androidNotFirefox = {
+            'ru': 'Данный браузер не поддерживается. Установите <a href="https://play.google.com/store/apps/details?id=org.mozilla.firefox" target="_blank">Firefox</a> для Android, или используйте ПК',
+            'en': 'This browser not supported. Install <a href="https://play.google.com/store/apps/details?id=org.mozilla.firefox" target="_blank">Firefox</a> for Android, or use PC/Mac'
+        }[lang]
+        const ios = {
+            'ru': 'на iPhone/iPad нельзя установить расширения, используйте Android или Windows/MacOs/Linux',
+            'en': 'iPhone/iPad prohibites browser extensions, use Android/Windows/MacOs/Linux instead'
+        }[lang]
+        function check() {
+            if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+                setStatus(ios);
+                return
+            }
+
+            function detectMobile() {
+                const toMatch = [
+                    /Android/i,
+                    /webOS/i,
+                    /iPhone/i,
+                    /iPad/i,
+                    /iPod/i,
+                    /BlackBerry/i,
+                    /Windows Phone/i
+                ]
+                
+                return toMatch.some((toMatchItem) => {
+                    return navigator.userAgent.match(toMatchItem)
+                })
+            }
+            let isMobile = navigator.userAgentData?.mobile
+            if (isMobile === undefined) {
+                isMobile = detectMobile()
+            }
+
+            console.log('isMobile:', isMobile)
+            console.log('firefox:', navigator.userAgent.match(/firefox/i))
+            if (isMobile && !navigator.userAgent.match(/firefox/i)) {
+                setStatus(androidNotFirefox)
+                return
+            }
+        }
+        check()
+    </script>
+</body>
+</html>
