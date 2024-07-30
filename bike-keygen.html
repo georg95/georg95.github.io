@@ -31,12 +31,12 @@
             'en': '<a id="install" href="https://georg95.github.io/hamster-bike-keygen/script.user.js">Install user script</a>',
         }[lang]
         const installViolentmonkeyFirefox = {
-            'ru': 'Ничего не происходит? Установите плагин <a href="https://addons.mozilla.org/firefox/addon/violentmonkey/">Violentmonkey</a>',
-            'en': 'Nothing happening? Install <a href="https://addons.mozilla.org/firefox/addon/violentmonkey/">Violentmonkey</a> plugin',
+            'ru': 'Ничего не происходит? Установите плагин <a id="plugin" href="https://addons.mozilla.org/firefox/addon/violentmonkey/">Violentmonkey</a>',
+            'en': 'Nothing happening? Install <a id="plugin" href="https://addons.mozilla.org/firefox/addon/violentmonkey/">Violentmonkey</a> plugin',
         }[lang]
         const installViolentmonkeyChrome = {
-            'ru': 'Ничего не происходит? Установите плагин <a href="https://chromewebstore.google.com/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag/">Violentmonkey</a>',
-            'en': 'Nothing happening? Install <a href="https://chromewebstore.google.com/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag/">Violentmonkey</a> plugin',
+            'ru': 'Ничего не происходит? Установите плагин <a id="plugin" href="https://chromewebstore.google.com/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag" target="_blank" rel="nofollow noopener noreferrer">Violentmonkey</a>',
+            'en': 'Nothing happening? Install <a id="plugin" href="https://chromewebstore.google.com/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag" target="_blank" rel="nofollow noopener noreferrer">Violentmonkey</a> plugin',
         }[lang]
         function check() {
             if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
@@ -77,6 +77,10 @@
                 document.querySelector('#install').onclick = () => {
                     setTimeout(() => {
                         setStatus(isFirefox ? installViolentmonkeyFirefox : installViolentmonkeyChrome)
+
+                        document.querySelector('#plugin').onclick = () => {
+                            location.reload()
+                        }
                     }, 1000)
                 }
             })
