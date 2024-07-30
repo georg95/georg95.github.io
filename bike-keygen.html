@@ -7,7 +7,7 @@
     <title>Hamster Kombat bike keygen</title>
 </head>
 <body>
-    <h2 id="status"><a href="https://georg95.github.io/hamster-bike-keygen/script.user.js">Install</a></h2>
+    <h2 id="status"></h2>
     <script>
         const status = document.querySelector('#status')
         function setStatus(text) {
@@ -26,9 +26,21 @@
             'ru': 'на iPhone/iPad нельзя установить расширения, используйте Android или Windows/MacOs/Linux',
             'en': 'iPhone/iPad prohibites browser extensions, use Android/Windows/MacOs/Linux instead'
         }[lang]
+        const install = {
+            'ru': '<a id="install" href="https://georg95.github.io/hamster-bike-keygen/script.user.js">Установить скрипт</a>',
+            'en': '<a id="install" href="https://georg95.github.io/hamster-bike-keygen/script.user.js">Install user script</a>',
+        }
+        const installViolentmonkeyFirefox = {
+            'ru': 'Ничего не происходит? Установите плагин <a href="https://addons.mozilla.org/firefox/addon/violentmonkey/">Violentmonkey</a>',
+            'en': 'Nothing happening? Install <a href="https://addons.mozilla.org/firefox/addon/violentmonkey/">Violentmonkey</a> plugin',
+        }
+        const installViolentmonkeyChrome = {
+            'ru': 'Ничего не происходит? Установите плагин <a href="https://chromewebstore.google.com/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag/">Violentmonkey</a>',
+            'en': 'Nothing happening? Install <a href="https://chromewebstore.google.com/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag/">Violentmonkey</a> plugin',
+        }
         function check() {
             if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
-                setStatus(ios);
+                setStatus(ios)
                 return
             }
 
@@ -51,13 +63,23 @@
             if (isMobile === undefined) {
                 isMobile = detectMobile()
             }
+            const isFirefox = navigator.userAgent.match(/firefox/i)
 
             console.log('isMobile:', isMobile)
             console.log('firefox:', navigator.userAgent.match(/firefox/i))
-            if (isMobile && !navigator.userAgent.match(/firefox/i)) {
+            if (isMobile && !isFirefox) {
                 setStatus(androidNotFirefox)
                 return
             }
+
+            setStatus(install)
+            setTimeout(() => {
+                document.querySelector('#install')?.onclick = () => {
+                    setTimeout(() => {
+                        setStatus(isFirefox ? installViolentmonkeyFirefox : installViolentmonkeyChrome)
+                    }, 1000)
+                }
+            })
         }
         check()
     </script>
