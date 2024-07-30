@@ -79,7 +79,7 @@
                         setStatus(isFirefox ? installViolentmonkeyFirefox : installViolentmonkeyChrome)
 
                         document.querySelector('#plugin').onclick = () => {
-                            location.reload()
+                            setTimeout(() => location.reload(), 1000)
                         }
                     }, 1000)
                 }
