@@ -29,15 +29,15 @@
         const install = {
             'ru': '<a id="install" href="https://georg95.github.io/hamster-bike-keygen/script.user.js">Установить скрипт</a>',
             'en': '<a id="install" href="https://georg95.github.io/hamster-bike-keygen/script.user.js">Install user script</a>',
-        }
+        }[lang]
         const installViolentmonkeyFirefox = {
             'ru': 'Ничего не происходит? Установите плагин <a href="https://addons.mozilla.org/firefox/addon/violentmonkey/">Violentmonkey</a>',
             'en': 'Nothing happening? Install <a href="https://addons.mozilla.org/firefox/addon/violentmonkey/">Violentmonkey</a> plugin',
-        }
+        }[lang]
         const installViolentmonkeyChrome = {
             'ru': 'Ничего не происходит? Установите плагин <a href="https://chromewebstore.google.com/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag/">Violentmonkey</a>',
             'en': 'Nothing happening? Install <a href="https://chromewebstore.google.com/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag/">Violentmonkey</a> plugin',
-        }
+        }[lang]
         function check() {
             if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
                 setStatus(ios)
@@ -74,7 +74,7 @@
 
             setStatus(install)
             setTimeout(() => {
-                document.querySelector('#install')?.onclick = () => {
+                document.querySelector('#install').onclick = () => {
                     setTimeout(() => {
                         setStatus(isFirefox ? installViolentmonkeyFirefox : installViolentmonkeyChrome)
                     }, 1000)
