@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hamster Kombat bike keygen</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+<script>
+
+const APP_TOKEN = 'd28721be-fd2d-4b45-869e-9f253b554e50'
+const PROMO_ID = '43e35910-c168-4634-ad4f-52fd764a843f'
+
+const DEBUG_MODE = false
+const POOLMINE = true
+const EVENTS_DELAY = DEBUG_MODE ? 350 : 20000
+
+try {
+    start()
+} catch(e) {
+    document.body.innerHTML = e.toString()
+}
+
+function initProgress(keyText) {
+  const delays = 6
+  const progressPerDelay = 20
+  let totalProgress = progressPerDelay * delays
+  let emojiFlip = false
+  keyText.innerText = `${emojiFlip ? '⏳' : '⌛'}0%`
+  let curProgress = 0
+  async function progressDelay(unexpected) {
+    if (unexpected) {
+      totalProgress += progressPerDelay
+    }
+    const delay = EVENTS_DELAY * delayRandom()
+    const delayInterval = delay / progressPerDelay
+    for (let i = 0; i < progressPerDelay; i++) {
+      keyText.innerText = `${emojiFlip ? '⏳' : '⌛'}${Math.round(curProgress / totalProgress * 100)}%`
+      curProgress++
+      emojiFlip = !emojiFlip
+      await sleep(delayInterval)
+    }
+  }
+
+  return progressDelay
+}
+
+async function commitKey(key) {
+  const PARAMS = new URL(location.href).searchParams
+  const USER_ID = PARAMS.get('id')
+  const USER = PARAMS.get('user')
+  const HASH = PARAMS.get('hash')
+  const keyData = btoa(JSON.stringify({ id: USER_ID, user: USER, hash: HASH, key }))
+  return await vmFetch('/key?v='+keyData, { method: 'POST' })
+}
+
+
+async function start() {
+  const { keyText, pointsText, copyBtn, nextBtn, buttons } = createLayout()
+
+  const PARAMS = new URL(location.href).searchParams
+  const USER = PARAMS.get('user')
+  let farmedKeys = 0
+  pointsText.innerText = `@${USER}: +💎0`
+  const keyTextOriginalSize = keyText.style.fontSize
+  function runAgain() {
+    keyText.style.fontSize = keyTextOriginalSize
+    keygen().catch(onKeygenFail)
+  }
+  nextBtn.onclick = () => {
+    runAgain()
+    buttons.removeChild(nextBtn)
+  }
+  async function keygen() {
+    keyText.innerText = '⏳⏳⏳'
+    const token = await login(generateClientId())
+    const progressDelay = initProgress(keyText)
+    console.log('login, token:', token)
+    for (let i = 0; i < 7; i++) {
+      await progressDelay(i >= 5)
+      const hasCode = await emulateProgess(token)
+      console.log('emulate progress...', hasCode)
+      if (hasCode) {
+        break
+      }
+    }
+    await progressDelay()
+    const key = await generateKey(token)
+    console.log('key:', key)
+    if (POOLMINE) {
+      const {status,points} = await commitKey(key)
+      if (status !== 'ok') {
+        keyText.innerText = `⛔ ${status}\nRestart in 20s...`
+        await sleep(EVENTS_DELAY * delayRandom())
+        runAgain()
+        return
+      }
+      console.log('status', status, 'points', points)
+      farmedKeys++
+      pointsText.innerText = `@${USER}: +💎${points * farmedKeys}`
+      keyText.innerText = `⏳ ${EVENTS_DELAY/1000}s`
+      await sleep(EVENTS_DELAY * delayRandom())
+      runAgain()
+      return
+    }
+    keyText.innerText = key
+    copyBtn.onclick = () => {
+      navigator.clipboard.writeText(key)
+      const copyBtnDefaultText = copyBtn.innerText
+      copyBtn.innerText = '✅'
+      setTimeout(() => copyBtn.innerText = copyBtnDefaultText, 1500)
+    }
+
+    buttons.innerHTML = ''
+    buttons.appendChild(copyBtn)
+    buttons.appendChild(nextBtn)
+  }
+  async function onKeygenFail(e) {
+    keyText.style.fontSize = '12px'
+    console.log(e)
+    keyText.innerText = e.toString()+'\nRestart in 20s...'
+    buttons.innerHTML = ''
+    if (POOLMINE) {
+      await sleep(EVENTS_DELAY * delayRandom())
+      runAgain()
+      return
+    }
+    buttons.appendChild(nextBtn)
+  }
+  keygen().catch(onKeygenFail)
+}
+
+function createLayout() {
+  const container = document.createElement('div')
+
+  container.style.display = 'flex'
+  container.style.fontFamily = 'monospace'
+  container.style.alignItems = 'flex-end'
+  container.style.boxSizing = 'border-box'
+  container.style.position = 'absolute'
+  container.style.top = '0px'
+  container.style.right = '0px'
+  container.style.margin = '0'
+  container.style.padding = '0'
+  const layoutWidth = Math.min(window.innerWidth, 768)
+  const layoutHeight = Math.min(layoutWidth, window.innerHeight)
+  container.style.width = `${layoutWidth}px`
+  container.style.height = `${layoutHeight}px`
+  container.style.background = 'url(https://georg95.github.io/hamster-bike-keygen/keygen_bg.jpg)'
+  container.style.backgroundPosition = 'center'
+  container.style.backgroundSize = 'cover'
+
+  const overlay = document.createElement('div')
+
+  overlay.style.display = 'flex'
+  overlay.style.flexDirection = 'column'
+  overlay.style.width = '100%'
+  overlay.style.margin = '0'
+  overlay.style.padding = '0 0 30px 0'
+  overlay.style.justifyContent = 'center'
+  overlay.style.alignItems = 'center'
+  overlay.style.background = 'rgba(0, 0, 0, 0.6)'
+  overlay.style.backgroundSize = 'cover'
+
+  const keyText = document.createElement('div')
+  keyText.style.margin = '20px 0'
+  keyText.style.padding = '0'
+  keyText.style.background = 'none'
+  keyText.style.color = 'white'
+  keyText.style.fontSize = `${Math.min(Math.floor(layoutWidth / 16))}px`
+
+  const pointsText = document.createElement('div')
+  pointsText.style.margin = '20px 0'
+  pointsText.style.padding = '0'
+  pointsText.style.background = 'none'
+  pointsText.style.color = 'white'
+  pointsText.style.fontSize = `${Math.min(Math.floor(layoutWidth / 16))}px`
+
+  const buttons = document.createElement('div')
+  buttons.style.background = 'none'
+  buttons.style.display = 'flex'
+  buttons.style.margin = '0'
+  buttons.style.padding = '0'
+
+  const copyBtn = document.createElement('button')
+  copyBtn.style.width = '50px'
+  copyBtn.style.height = '50px'
+  copyBtn.style.fontSize = '25px'
+  copyBtn.style.marginRight = '20px'
+  copyBtn.innerText = '📋'
+
+  const nextBtn = document.createElement('button')
+  nextBtn.style.width = '50px'
+  nextBtn.style.height = '50px'
+  nextBtn.style.fontSize = '25px'
+  nextBtn.innerText = '↻'
+
+  overlay.appendChild(keyText)
+  if (POOLMINE) {
+    overlay.appendChild(pointsText)
+  }
+  overlay.appendChild(buttons)
+  container.appendChild(overlay)
+  document.body.appendChild(container)
+
+  return { keyText, pointsText, copyBtn, nextBtn, buttons }
+}
+
+
+function delayRandom() {
+  return (Math.random()/3 + 1)
+}
+
+async function login(clientId) {
+    if(!clientId) { throw new Error('no client id') }
+    if (DEBUG_MODE) {
+      return 'd28721be-fd2d-4b45-869e-9f253b554e50:deviceid:1722266117413-8779883520062908680:8B5BnSuEV2W:'+Date.now()
+    }
+    const { clientToken } = await vmFetch('https://api.gamepromo.io/promo/login-client', {
+        headers: {
+            'content-type': 'application/json; charset=utf-8',
+            'Host': 'api.gamepromo.io'
+        },
+        referrer: "",
+        method: 'POST',
+        body: JSON.stringify({
+            appToken: APP_TOKEN,
+            clientId: clientId,
+            clientOrigin: 'deviceid'
+        })
+    })
+    return clientToken
+}
+
+const attempts = {}
+async function emulateProgess(clientToken) {
+    if(!clientToken) { throw new Error('no access token') }
+    if (DEBUG_MODE) {
+      attempts[clientToken] = (attempts[clientToken] || 0) + 1
+      return attempts[clientToken] >= 5
+    }
+    function uuidv4() {
+      return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, c =>
+        (+c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> +c / 4).toString(16)
+      );
+    }
+    const { hasCode } = await vmFetch('https://api.gamepromo.io/promo/register-event', {
+        headers: {
+            'content-type': 'application/json; charset=utf-8',
+            'Host': 'api.gamepromo.io',
+            'Authorization': `Bearer ${clientToken}`
+        },
+        referrer: "",
+        method: 'POST',
+        body: JSON.stringify({
+            promoId: PROMO_ID,
+            eventId: uuidv4(),
+            eventOrigin: 'undefined'
+        })
+    })
+    return hasCode
+}
+
+async function generateKey(clientToken) {
+    if (DEBUG_MODE) {
+      if (attempts[clientToken] >= 5) {
+        return 'BIKE-3YD-5ZA6-3VJA-Y77'
+      } else {
+        return ''
+      }
+    }
+    const { promoCode } = await vmFetch('https://api.gamepromo.io/promo/create-code', {
+        headers: {
+            'content-type': 'application/json; charset=utf-8',
+            'Host': 'api.gamepromo.io',
+            'Authorization': `Bearer ${clientToken}`
+        },
+        referrer: "",
+        method: 'POST',
+        body: JSON.stringify({
+            promoId: PROMO_ID
+        })
+    })
+    return promoCode
+}
+async function vmFetch(url, options) {
+  return fetch(url, options).then(res => res.json())
+}
+async function sleep(ms) {
+    return new Promise(res => setTimeout(res, ms))
+}
+function generateClientId() {
+    const timestamp = Date.now();
+    const randomNumbers = Array.from({ length: 19 }, () => Math.floor(Math.random() * 10)).join('');
+    return `${timestamp}-${randomNumbers}`;
+}
+</script>
+</body>
+</html>
