@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>safe-fetch</title>
+</head>
+<body>
+    <script>
+        function sendBack(resp, id) {
+            window.parent.postMessage({ resp, id }, '*')
+        }
+        window.onmessage = (e) => {
+            console.log('message', e.data)
+            const {url, options, id} = e.data
+            fetch(url, options)
+                .then(res => res.json())
+                .then(res => sendBack(res, id))
+                .catch(res => sendBack(res, id))
+        }
+    </script>
+</body>
+</html>
