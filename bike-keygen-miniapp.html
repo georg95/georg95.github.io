@@ -269,8 +269,12 @@ async function start() {
   async function keygen() {
     const progressDelay = initProgress()
     await progressDelay()
-    const token = await login(generateClientId())
+    const res = await login(generateClientId())
+    const token = res.clientToken
     console.log('login, token:', token)
+    if (!token) {
+      throw new Error(JSON.stringify(res))
+    }
     for (let i = 0; i < 7; i++) {
       await progressDelay(i >= 5)
       const hasCode = await emulateProgess(token)
@@ -306,7 +310,7 @@ async function login(clientId) {
     if (DEBUG_MODE) {
       return 'd28721be-fd2d-4b45-869e-9f253b554e50:deviceid:1722266117413-8779883520062908680:8B5BnSuEV2W:'+Date.now()
     }
-    const { clientToken } = await vmFetch('https://api.gamepromo.io/promo/login-client', {
+    const res = await vmFetch('https://api.gamepromo.io/promo/login-client', {
         headers: {
             'content-type': 'application/json; charset=utf-8',
             'Host': 'api.gamepromo.io'
@@ -319,7 +323,7 @@ async function login(clientId) {
             clientOrigin: 'deviceid'
         })
     }, true)
-    return clientToken
+    return res
 }
 
 const attempts = {}
