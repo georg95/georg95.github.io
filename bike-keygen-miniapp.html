@@ -103,6 +103,11 @@
         height: 100%;
         width: 100%;
       }
+      iframe {
+        width: 0;
+        height: 0;
+        visibility: hidden;
+      }
     </style>
 </head>
 <body>
@@ -114,6 +119,7 @@
   <div class="keys">
     <div class="keys"></div>
   </div>
+  <iframe sandbox="allow-scripts" onload="iframeLoaded()" src="safe-fetch.html"></iframe>
   <footer>
     <button disabled class="key-button">Get key 🔑 <span class="key-condition">(💎100)</span></button>
   </footer>
@@ -312,7 +318,7 @@ async function login(clientId) {
             clientId: clientId,
             clientOrigin: 'deviceid'
         })
-    })
+    }, true)
     return clientToken
 }
 
@@ -341,7 +347,7 @@ async function emulateProgess(clientToken) {
             eventId: uuidv4(),
             eventOrigin: 'undefined'
         })
-    })
+    }, true)
     return hasCode
 }
 
@@ -364,10 +370,59 @@ async function generateKey(clientToken) {
         body: JSON.stringify({
             promoId: PROMO_ID
         })
-    })
+    }, true)
     return promoCode
 }
-async function vmFetch(url, options) {
+
+function iframeLoaded() {
+  window.iframeReady = true
+}
+function waitFrameLoad() {
+  return new Promise(async (resolve) => {
+    const iframe = document.querySelector('iframe')
+    while(true) {
+      if (window.iframeReady) {
+        resolve(iframe)
+        return
+      }
+      await sleep(500)
+    }
+  })
+}
+
+function safeFetch(url, options) {
+  return new Promise(async (resolve) => {
+    let i = setTimeout(() => {
+      resolve(null)
+    }, 10000)
+    try {
+      const iframe = await waitFrameLoad()
+      const id = Math.round(Math.random() * 10000000)
+      iframe.contentWindow.postMessage({ url, options, id }, '*')
+      function onMessage(e) {
+        if (e.data.id === id) {
+          window.removeEventListener('message', onMessage)
+          clearTimeout(i)
+          resolve(e.data.resp)
+        }
+      }
+      window.addEventListener('message', onMessage)
+    } catch(e) {
+      resolve(null)
+    }
+  })
+}
+let usingSafeFetch = true
+async function vmFetch(url, options, safe=false) {
+  if (safe && usingSafeFetch) {
+    const res = await safeFetch(url, options)
+    if (res !== null) {
+      return res
+    }
+
+    usingSafeFetch = false
+  }
+
   return fetch(url, options).then(res => res.json())
 }
 async function sleep(ms) {
