@@ -243,6 +243,7 @@ async function showNewKey() {
 }
 
 async function start() {
+  window.Telegram.WebApp.expand()
   const keysRaw = localStorage.getItem('keys')
   if (keysRaw) {
     displayKeys = keysRaw.split(',')
