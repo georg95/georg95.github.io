@@ -6,77 +6,261 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hamster Kombat bike keygen</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        border: 0;
+      }
+      html {
+        height: 100%;
+      }
+      body {
+        padding-bottom: 120px;
+        padding-top: 60px;
+        font-size: 24px;
+        color: aliceblue;
+        font-family: sans-serif;
+        font-weight: bold;
+        min-height: 100%;
+        background: url(https://georg95.github.io/hamster-bike-keygen/keygen_bg.jpg);
+        background-position: center;
+        background-size: cover;
+        display: flex;
+        flex-direction: column;
+      }
+      header, footer {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 60px;
+        background: rgba(0, 0, 0, 0.8);
+      }
+      .keys {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        justify-content: end;
+        align-items: center;
+      }
+      .error {
+        font-family: monospace;
+        background: rgba(0, 0, 0, 0.8);
+        margin: 10px;
+        padding: 10px;
+        color: coral;
+        font-size: 12px;
+      }
+      .key-container {
+        font-family: monospace;
+        background: rgba(0, 0, 0, 0.8);
+        margin: 10px;
+        display: flex;
+      }
+      .key {
+        cursor: pointer;
+        padding: 10px 15px;
+      }
+      .delete-key {
+        margin: 0 15px;
+        border: 0;
+        background: none;
+        cursor: pointer;
+      }
+      .diamond-emoji {
+        display: flex;
+        justify-content: end;
+        width: 100px;
+      }
+      .diamond-count {
+        display: block;
+        width: 150px;
+        margin-left: 10px;
+      }
+      footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        box-sizing: border-box;
+        padding: 20px;
+        justify-self: flex-end;
+        height: 120px;
+        background: rgba(0, 0, 0, 0.8);
+      }
+      .key-button {
+        cursor: pointer;
+        font-size: 40px;
+        height: 100%;
+        width: 100%;
+      }
+    </style>
 </head>
 <body>
-<script>
+  <header>
+    <span class="diamond-emoji">💎</span>
+    <span class="diamond-count">...<span>
 
+  </header>
+  <div class="keys">
+    <div class="keys"></div>
+  </div>
+  <footer>
+    <button disabled class="key-button">Get key 🔑 <span class="key-condition">(💎100)</span></button>
+  </footer>
+<script>
 const APP_TOKEN = 'd28721be-fd2d-4b45-869e-9f253b554e50'
 const PROMO_ID = '43e35910-c168-4634-ad4f-52fd764a843f'
-
 const DEBUG_MODE = false
-const POOLMINE = true
-const EVENTS_DELAY = DEBUG_MODE ? 350 : 20000
+const EVENTS_DELAY = DEBUG_MODE ? 2200 : 22000
+let DIAMONDS = null
+let displayKeys = []
 
 try {
-    start()
+  start()
 } catch(e) {
-    document.body.innerHTML = e.toString()
+  showError(e, 1000000)
 }
 
-function initProgress(keyText) {
-  const delays = 6
-  const progressPerDelay = 20
+function initProgress() {
+  const diamondCount = document.querySelector('.diamond-count')
+  const keyCondition = document.querySelector('.key-condition')
+  const keyButton = document.querySelector('.key-button')
+  const delays = 7
+  const progressPerDelay = 50
   let totalProgress = progressPerDelay * delays
-  let emojiFlip = false
-  keyText.innerText = `${emojiFlip ? '⏳' : '⌛'}0%`
   let curProgress = 0
-  async function progressDelay(unexpected) {
+  async function progressDelay(unexpected=false) {
     if (unexpected) {
       totalProgress += progressPerDelay
     }
-    const delay = EVENTS_DELAY * delayRandom()
+    const delay = EVENTS_DELAY
     const delayInterval = delay / progressPerDelay
     for (let i = 0; i < progressPerDelay; i++) {
-      keyText.innerText = `${emojiFlip ? '⏳' : '⌛'}${Math.round(curProgress / totalProgress * 100)}%`
-      curProgress++
-      emojiFlip = !emojiFlip
       await sleep(delayInterval)
+      curProgress++
+      const percent = curProgress / totalProgress
+      diamondCount.innerText = (DIAMONDS + 50 * percent).toFixed(1)
+      if (DIAMONDS < 100) {
+        const percentShow = DIAMONDS === 0 ? percent/2 : 0.5 + percent/2
+        keyCondition.innerText = `(💎${diamondCount.innerText}/100)`
+        keyButton.style.background = `linear-gradient(90deg, #C0FFCB ${percentShow*100}%, #FFFFFF 0%)`
+      }
     }
   }
 
   return progressDelay
 }
 
-async function commitKey(key) {
-  const PARAMS = new URL(location.href).searchParams
-  const USER_ID = PARAMS.get('id')
-  const USER = PARAMS.get('user')
-  const HASH = PARAMS.get('hash')
-  const keyData = btoa(JSON.stringify({ id: USER_ID, user: USER, hash: HASH, key }))
-  return await vmFetch('/key?v='+keyData, { method: 'POST' })
+async function putKey(key) {
+  const keyData = btoa(JSON.stringify({ login: window.Telegram.WebApp.initData, key }))
+  return await vmFetch('https://v94015.hosted-by-vdsina.com/putkey?v='+keyData, { method: 'POST' })
+}
+
+async function getKey() {
+  const userData = btoa(JSON.stringify({ login: window.Telegram.WebApp.initData }))
+  return await vmFetch('https://v94015.hosted-by-vdsina.com/getkey?v='+userData, { method: 'POST' })
 }
 
 
-async function start() {
-  const { keyText, pointsText, copyBtn, nextBtn, buttons } = createLayout()
+async function botLogin() {
+  const { diamonds, status, reason } = await vmFetch('https://v94015.hosted-by-vdsina.com/sync?v='+
+    btoa(JSON.stringify({ login: window.Telegram.WebApp.initData })))
 
-  const PARAMS = new URL(location.href).searchParams
-  const USER = PARAMS.get('user')
-  let farmedKeys = 0
-  pointsText.innerText = `@${USER}: +💎0`
-  const keyTextOriginalSize = keyText.style.fontSize
-  function runAgain() {
-    keyText.style.fontSize = keyTextOriginalSize
-    keygen().catch(onKeygenFail)
+  if (status !== 'ok') {
+    showError(reason, 1000000)
+    return false
   }
-  nextBtn.onclick = () => {
-    runAgain()
-    buttons.removeChild(nextBtn)
+
+  updateDiamondsValue(diamonds)
+  return true
+}
+
+function updateDiamondsValue(diamonds) {
+  DIAMONDS = diamonds
+  document.querySelector('.key-button').disabled = DIAMONDS < 100
+  document.querySelector('.key-button').style.background = ''
+  if (DIAMONDS >= 100) {
+    document.querySelector('.key-condition').innerText = '(💎100)'
   }
+  document.querySelector('.diamond-count').innerText = diamonds
+}
+
+
+function displayKey(key) {
+  console.log('displayKey', key)
+
+  const deleteButton = document.createElement('button')
+  deleteButton.className = 'delete-key'
+  deleteButton.innerText = '❌'
+  deleteButton.onclick = () => {
+    const index = displayKeys.indexOf(key)
+    if (index !== -1) {
+      displayKeys.splice(index, 1)
+      localStorage.setItem('keys', displayKeys.join(','))
+    }
+    document.querySelector('.keys').removeChild(keyContainer)
+  }
+
+  const keyText = document.createElement('span')
+  keyText.className = 'key'
+  keyText.innerText = key
+  keyText.onclick = () => { navigator.clipboard.writeText(key) }
+
+  const keyContainer = document.createElement('div')
+  keyContainer.className = 'key-container'
+
+  keyContainer.appendChild(deleteButton)
+  keyContainer.appendChild(keyText)
+  document.querySelector('.keys').appendChild(keyContainer)
+}
+
+function showError(err, ms=5000) {
+  console.error(err)
+  const errMessage = document.createElement('div')
+  errMessage.className = 'error'
+  errMessage.innerText = `${err}`
+  document.querySelector('.keys').appendChild(errMessage)
+  setTimeout(() => {
+    document.querySelector('.keys').removeChild(errMessage)
+  }, ms)
+}
+
+async function showNewKey() {
+  const { key, diamonds } = await getKey()
+  updateDiamondsValue(diamonds)
+  displayKeys.push(key)
+  displayKey(key)
+  localStorage.setItem('keys', displayKeys.join(','))
+}
+
+async function start() {
+  const keysRaw = localStorage.getItem('keys')
+  if (keysRaw) {
+    displayKeys = keysRaw.split(',')
+  }
+  displayKeys.forEach(displayKey)
+  
+  document.querySelector('.key-button').onclick = showNewKey
+  const diamondCount = document.querySelector('.diamond-count')
+  const keyCondition = document.querySelector('.key-condition')
+  if (!await botLogin()) {
+    diamondCount.innerText = '???'
+    return
+  }
+  diamondCount.innerText = DIAMONDS
+
   async function keygen() {
-    keyText.innerText = '⏳⏳⏳'
+    const progressDelay = initProgress()
+    await progressDelay()
     const token = await login(generateClientId())
-    const progressDelay = initProgress(keyText)
     console.log('login, token:', token)
     for (let i = 0; i < 7; i++) {
       await progressDelay(i >= 5)
@@ -88,129 +272,24 @@ async function start() {
     }
     await progressDelay()
     const key = await generateKey(token)
-    console.log('key:', key)
-    if (POOLMINE) {
-      const {status,points} = await commitKey(key)
-      if (status !== 'ok') {
-        keyText.innerText = `⛔ ${status}\nRestart in 20s...`
-        await sleep(EVENTS_DELAY * delayRandom())
-        runAgain()
-        return
-      }
-      console.log('status', status, 'points', points)
-      farmedKeys++
-      pointsText.innerText = `@${USER}: +💎${points * farmedKeys}`
-      keyText.innerText = `⏳ ${EVENTS_DELAY/1000}s`
-      await sleep(EVENTS_DELAY * delayRandom())
-      runAgain()
-      return
+    const {status,diamonds} = await putKey(key)
+    if (status !== 'ok') {
+      showError(status, 15000)
     }
-    keyText.innerText = key
-    copyBtn.onclick = () => {
-      navigator.clipboard.writeText(key)
-      const copyBtnDefaultText = copyBtn.innerText
-      copyBtn.innerText = '✅'
-      setTimeout(() => copyBtn.innerText = copyBtnDefaultText, 1500)
+    updateDiamondsValue(diamonds)
+    if (diamonds >= 100 && displayKeys.length === 0) {
+      await showNewKey()
     }
-
-    buttons.innerHTML = ''
-    buttons.appendChild(copyBtn)
-    buttons.appendChild(nextBtn)
   }
-  async function onKeygenFail(e) {
-    keyText.style.fontSize = '12px'
-    console.log(e)
-    keyText.innerText = e.toString()+'\nRestart in 20s...'
-    buttons.innerHTML = ''
-    if (POOLMINE) {
-      await sleep(EVENTS_DELAY * delayRandom())
-      runAgain()
-      return
+
+  while(true) {
+    try {
+      await keygen()
+    } catch(e) {
+      showError(e, 15000)
+      await sleep(3000)
     }
-    buttons.appendChild(nextBtn)
   }
-  keygen().catch(onKeygenFail)
-}
-
-function createLayout() {
-  const container = document.createElement('div')
-
-  container.style.display = 'flex'
-  container.style.fontFamily = 'monospace'
-  container.style.alignItems = 'flex-end'
-  container.style.boxSizing = 'border-box'
-  container.style.position = 'absolute'
-  container.style.top = '0px'
-  container.style.right = '0px'
-  container.style.margin = '0'
-  container.style.padding = '0'
-  const layoutWidth = Math.min(window.innerWidth, 768)
-  const layoutHeight = Math.min(layoutWidth, window.innerHeight)
-  container.style.width = `${layoutWidth}px`
-  container.style.height = `${layoutHeight}px`
-  container.style.background = 'url(https://georg95.github.io/hamster-bike-keygen/keygen_bg.jpg)'
-  container.style.backgroundPosition = 'center'
-  container.style.backgroundSize = 'cover'
-
-  const overlay = document.createElement('div')
-
-  overlay.style.display = 'flex'
-  overlay.style.flexDirection = 'column'
-  overlay.style.width = '100%'
-  overlay.style.margin = '0'
-  overlay.style.padding = '0 0 30px 0'
-  overlay.style.justifyContent = 'center'
-  overlay.style.alignItems = 'center'
-  overlay.style.background = 'rgba(0, 0, 0, 0.6)'
-  overlay.style.backgroundSize = 'cover'
-
-  const keyText = document.createElement('div')
-  keyText.style.margin = '20px 0'
-  keyText.style.padding = '0'
-  keyText.style.background = 'none'
-  keyText.style.color = 'white'
-  keyText.style.fontSize = `${Math.min(Math.floor(layoutWidth / 16))}px`
-
-  const pointsText = document.createElement('div')
-  pointsText.style.margin = '20px 0'
-  pointsText.style.padding = '0'
-  pointsText.style.background = 'none'
-  pointsText.style.color = 'white'
-  pointsText.style.fontSize = `${Math.min(Math.floor(layoutWidth / 16))}px`
-
-  const buttons = document.createElement('div')
-  buttons.style.background = 'none'
-  buttons.style.display = 'flex'
-  buttons.style.margin = '0'
-  buttons.style.padding = '0'
-
-  const copyBtn = document.createElement('button')
-  copyBtn.style.width = '50px'
-  copyBtn.style.height = '50px'
-  copyBtn.style.fontSize = '25px'
-  copyBtn.style.marginRight = '20px'
-  copyBtn.innerText = '📋'
-
-  const nextBtn = document.createElement('button')
-  nextBtn.style.width = '50px'
-  nextBtn.style.height = '50px'
-  nextBtn.style.fontSize = '25px'
-  nextBtn.innerText = '↻'
-
-  overlay.appendChild(keyText)
-  if (POOLMINE) {
-    overlay.appendChild(pointsText)
-  }
-  overlay.appendChild(buttons)
-  container.appendChild(overlay)
-  document.body.appendChild(container)
-
-  return { keyText, pointsText, copyBtn, nextBtn, buttons }
-}
-
-
-function delayRandom() {
-  return (Math.random()/3 + 1)
 }
 
 async function login(clientId) {
