@@ -124,7 +124,6 @@
     <button disabled class="key-button">Get key 🔑 <span class="key-condition">(💎100)</span></button>
   </footer>
 <script>
-setTimeout(() => { location.reload() }, 1000 * 60 * 30)
 const CONFIG = {
     BIKE: {
         appToken: 'd28721be-fd2d-4b45-869e-9f253b554e50',
@@ -152,6 +151,7 @@ let displayKeys = []
 let typeNum = 1
 
 try {
+  setTimeout(() => { location.reload() }, 1000 * 60 * 30)
   start()
 } catch(e) {
   showError(e, 1000000)
@@ -280,7 +280,7 @@ async function showNewKey() {
 async function start() {
   window.Telegram.WebApp.expand()
   const keysRaw = localStorage.getItem('keys')
-  typeNum = localStorage.getItem('typeNum') || 1
+  typeNum = Number(localStorage.getItem('typeNum')) || 0
   if (keysRaw) {
     displayKeys = keysRaw.split(',')
   }
