@@ -124,7 +124,7 @@
     <button disabled class="key-button">Get key 🔑 <span class="key-condition">(💎100)</span></button>
   </footer>
 <script>
-
+setTimeout(() => { location.reload() }, 1000 * 60 * 30)
 const CONFIG = {
     BIKE: {
         appToken: 'd28721be-fd2d-4b45-869e-9f253b554e50',
@@ -149,6 +149,7 @@ const DEBUG_MODE = false
 const EVENTS_DELAY = DEBUG_MODE ? 2200 : 22000
 let DIAMONDS = null
 let displayKeys = []
+let typeNum = 1
 
 try {
   start()
@@ -192,7 +193,11 @@ async function putKey(key) {
 }
 
 async function getKey() {
-  const userData = btoa(JSON.stringify({ login: window.Telegram.WebApp.initData }))
+  typeNum = (typeNum + 1) % 4
+  const mode = Object.keys(CONFIG)[typeNum]
+  console.log(mode)
+  localStorage.setItem('typeNum', typeNum)
+  const userData = btoa(JSON.stringify({ login: window.Telegram.WebApp.initData, mode }))
   return await vmFetch('https://v94015.hosted-by-vdsina.com/getkey?v='+userData, { method: 'POST' })
 }
 
@@ -275,6 +280,7 @@ async function showNewKey() {
 async function start() {
   window.Telegram.WebApp.expand()
   const keysRaw = localStorage.getItem('keys')
+  typeNum = localStorage.getItem('typeNum') || 1
   if (keysRaw) {
     displayKeys = keysRaw.split(',')
   }
@@ -317,7 +323,7 @@ async function start() {
     }
     updateDiamondsValue(diamonds)
     if (diamonds >= 100 && displayKeys.length === 0) {
-      // await showNewKey()
+      await showNewKey()
     }
   }
 
@@ -334,7 +340,7 @@ async function start() {
 async function login(clientId, appToken) {
     if(!clientId) { throw new Error('no client id') }
     if (DEBUG_MODE) {
-      return 'd28721be-fd2d-4b45-869e-9f253b554e50:deviceid:1722266117413-8779883520062908680:8B5BnSuEV2W:'+Date.now()
+      return { clientToken: 'd28721be-fd2d-4b45-869e-9f253b554e50:deviceid:1722266117413-8779883520062908680:8B5BnSuEV2W:'+Date.now() }
     }
     const res = await vmFetch('https://api.gamepromo.io/promo/login-client', {
         headers: {
@@ -357,7 +363,7 @@ async function emulateProgess(clientToken, promoId) {
     if(!clientToken) { throw new Error('no access token') }
     if (DEBUG_MODE) {
       attempts[clientToken] = (attempts[clientToken] || 0) + 1
-      return attempts[clientToken] >= 5
+      return { hasCode: attempts[clientToken] >= 5 }
     }
     function uuidv4() {
       return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, c =>
@@ -384,7 +390,7 @@ async function emulateProgess(clientToken, promoId) {
 async function generateKey(clientToken, promoId) {
     if (DEBUG_MODE) {
       if (attempts[clientToken] >= 5) {
-        return 'BIKE-3YD-5ZA6-3VJA-Y77'
+        return 'B1KE-3YD-5ZA6-3VJA-Y77'
       } else {
         return ''
       }
