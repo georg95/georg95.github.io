@@ -124,8 +124,27 @@
     <button disabled class="key-button">Get key 🔑 <span class="key-condition">(💎100)</span></button>
   </footer>
 <script>
-const APP_TOKEN = 'd28721be-fd2d-4b45-869e-9f253b554e50'
-const PROMO_ID = '43e35910-c168-4634-ad4f-52fd764a843f'
+
+const CONFIG = {
+    BIKE: {
+        appToken: 'd28721be-fd2d-4b45-869e-9f253b554e50',
+        promoId: '43e35910-c168-4634-ad4f-52fd764a843f'
+    },
+    CLONE: {
+        appToken: '74ee0b5b-775e-4bee-974f-63e7f4d5bacb',
+        promoId: 'fe693b26-b342-4159-8808-15e3ff7f8767'
+    },
+    CUBE: {
+        appToken: 'd1690a07-3780-4068-810f-9b5bbf2931b2',
+        promoId: 'b4170868-cef0-424f-8eb9-be0622e8e8e3'
+    },
+    TRAIN: {
+        appToken: '82647f43-3f87-402d-88dd-09a90025313f',
+        promoId: 'c4480ac7-e178-4973-8061-9ed5b2e17954'
+    }
+}
+let APP_TOKEN = CONFIG.BIKE.appToken
+let PROMO_ID = CONFIG.BIKE.promoId
 const DEBUG_MODE = false
 const EVENTS_DELAY = DEBUG_MODE ? 2200 : 22000
 let DIAMONDS = null
@@ -179,9 +198,13 @@ async function getKey() {
 
 
 async function botLogin() {
-  const { diamonds, status, reason } = await vmFetch('https://v94015.hosted-by-vdsina.com/sync?v='+
+  const { diamonds, status, reason, mode } = await vmFetch('https://v94015.hosted-by-vdsina.com/sync?v='+
     btoa(JSON.stringify({ login: window.Telegram.WebApp.initData })))
 
+  if (mode) {
+    APP_TOKEN = CONFIG[mode].appToken
+    PROMO_ID = CONFIG[mode].promoId
+  }
   if (status !== 'ok') {
     showError(reason, 1000000)
     return false
@@ -269,7 +292,7 @@ async function start() {
   async function keygen() {
     const progressDelay = initProgress()
     await progressDelay()
-    const res = await login(generateClientId())
+    const res = await login(generateClientId(), APP_TOKEN)
     const token = res.clientToken
     console.log('login, token:', token)
     if (!token) {
@@ -277,14 +300,17 @@ async function start() {
     }
     for (let i = 0; i < 7; i++) {
       await progressDelay(i >= 5)
-      const hasCode = await emulateProgess(token)
-      console.log('emulate progress...', hasCode)
-      if (hasCode) {
+      const res = await emulateProgess(token, PROMO_ID)
+      console.log('emulate progress...', res.hasCode)
+      if (res.hasCode) {
         break
+      }
+      if (res.hasCode !== false) {
+        showError(JSON.stringify(res))
       }
     }
     await progressDelay()
-    const key = await generateKey(token)
+    const key = await generateKey(token, PROMO_ID)
     const {status,diamonds} = await putKey(key)
     if (status !== 'ok') {
       showError(status, 15000)
@@ -305,7 +331,7 @@ async function start() {
   }
 }
 
-async function login(clientId) {
+async function login(clientId, appToken) {
     if(!clientId) { throw new Error('no client id') }
     if (DEBUG_MODE) {
       return 'd28721be-fd2d-4b45-869e-9f253b554e50:deviceid:1722266117413-8779883520062908680:8B5BnSuEV2W:'+Date.now()
@@ -318,7 +344,7 @@ async function login(clientId) {
         referrer: "",
         method: 'POST',
         body: JSON.stringify({
-            appToken: APP_TOKEN,
+            appToken,
             clientId: clientId,
             clientOrigin: 'deviceid'
         })
@@ -327,7 +353,7 @@ async function login(clientId) {
 }
 
 const attempts = {}
-async function emulateProgess(clientToken) {
+async function emulateProgess(clientToken, promoId) {
     if(!clientToken) { throw new Error('no access token') }
     if (DEBUG_MODE) {
       attempts[clientToken] = (attempts[clientToken] || 0) + 1
@@ -338,7 +364,7 @@ async function emulateProgess(clientToken) {
         (+c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> +c / 4).toString(16)
       );
     }
-    const { hasCode } = await vmFetch('https://api.gamepromo.io/promo/register-event', {
+    const res = await vmFetch('https://api.gamepromo.io/promo/register-event', {
         headers: {
             'content-type': 'application/json; charset=utf-8',
             'Host': 'api.gamepromo.io',
@@ -347,15 +373,15 @@ async function emulateProgess(clientToken) {
         referrer: "",
         method: 'POST',
         body: JSON.stringify({
-            promoId: PROMO_ID,
+            promoId,
             eventId: uuidv4(),
             eventOrigin: 'undefined'
         })
     }, true)
-    return hasCode
+    return res
 }
 
-async function generateKey(clientToken) {
+async function generateKey(clientToken, promoId) {
     if (DEBUG_MODE) {
       if (attempts[clientToken] >= 5) {
         return 'BIKE-3YD-5ZA6-3VJA-Y77'
@@ -372,7 +398,7 @@ async function generateKey(clientToken) {
         referrer: "",
         method: 'POST',
         body: JSON.stringify({
-            promoId: PROMO_ID
+            promoId
         })
     }, true)
     return promoCode
