@@ -57,6 +57,7 @@
         padding: 10px;
         color: coral;
         font-size: 12px;
+        word-break: break-all;
       }
       .key-container {
         font-family: monospace;
@@ -86,6 +87,7 @@
         margin-left: 10px;
       }
       footer {
+        display: flex;
         position: fixed;
         bottom: 0;
         left: 0;
@@ -96,9 +98,20 @@
         height: 120px;
         background: rgba(0, 0, 0, 0.8);
       }
+      select {
+        flex: 1;
+        height: 100%;
+        font-size: 24px;
+        font-weight: bold;
+        margin-right: 15px;
+      }
+      .key-condition {
+        white-space: nowrap;
+      }
       .key-button {
+        flex: 2;
         cursor: pointer;
-        font-size: 28px;
+        font-size: 24px;
         font-weight: bold;
         height: 100%;
         width: 100%;
@@ -121,7 +134,13 @@
   </div>
   <iframe sandbox="allow-scripts" onload="iframeLoaded()" src="safe-fetch.html"></iframe>
   <footer>
-    <button disabled class="key-button">Get key 🔑 <span class="key-condition">(💎100)</span></button>
+    <select id="select-mode">
+      <option name="CLONE">👥 CLONE</option>
+      <option name="CUBE">🎲 CUBE</option>
+      <option name="TRAIN">🚂 TRAIN</option>
+      <option name="BIKE">🚲 BIKE</option>
+    </select>
+    <button disabled class="key-button">Get key 🔑 <span class="key-condition">💎100</span></button>
   </footer>
 <script>
 const CONFIG = {
@@ -144,11 +163,12 @@ const CONFIG = {
 }
 let APP_TOKEN = CONFIG.BIKE.appToken
 let PROMO_ID = CONFIG.BIKE.promoId
+let POOL_MODE = true
 const DEBUG_MODE = false
 const EVENTS_DELAY = DEBUG_MODE ? 2200 : 22000
 let DIAMONDS = null
 let displayKeys = []
-let typeNum = 1
+let usingSafeFetch = true
 
 try {
   setTimeout(() => { location.reload() }, 1000 * 60 * 30)
@@ -175,10 +195,14 @@ function initProgress() {
       await sleep(delayInterval)
       curProgress++
       const percent = curProgress / totalProgress
-      diamondCount.innerText = (DIAMONDS + 50 * percent).toFixed(1)
-      if (DIAMONDS < 100) {
+      if (!POOL_MODE) {
+        keyButton.style.background = `linear-gradient(90deg, #C0FFCB ${percent*100}%, #FFFFFF 0%)`
+      } else {
+        diamondCount.innerText = (DIAMONDS + 50 * percent).toFixed(1)
+      }
+      if (POOL_MODE && DIAMONDS < 100) {
         const percentShow = DIAMONDS === 0 ? percent/2 : 0.5 + percent/2
-        keyCondition.innerText = `(💎${diamondCount.innerText}/100)`
+        keyCondition.innerText = `💎${diamondCount.innerText}/100`
         keyButton.style.background = `linear-gradient(90deg, #C0FFCB ${percentShow*100}%, #FFFFFF 0%)`
       }
     }
@@ -192,31 +216,41 @@ async function putKey(key) {
   return await vmFetch('https://v94015.hosted-by-vdsina.com/putkey?v='+keyData, { method: 'POST' })
 }
 
+function selectedMode() {
+  const select = document.querySelector('#select-mode')
+  const mode = select.options[select.selectedIndex].getAttribute('name') || 'BIKE'
+  console.log('mode:', mode, 'option:', select.options[select.selectedIndex])
+  return mode
+}
+
 async function getKey() {
-  typeNum = (typeNum + 1) % 4
-  const mode = Object.keys(CONFIG)[typeNum]
-  console.log(mode)
-  localStorage.setItem('typeNum', typeNum)
-  const userData = btoa(JSON.stringify({ login: window.Telegram.WebApp.initData, mode }))
+  const userData = btoa(JSON.stringify({ login: window.Telegram.WebApp.initData, mode: selectedMode() }))
   return await vmFetch('https://v94015.hosted-by-vdsina.com/getkey?v='+userData, { method: 'POST' })
 }
 
-
 async function botLogin() {
-  const { diamonds, status, reason, mode } = await vmFetch('https://v94015.hosted-by-vdsina.com/sync?v='+
-    btoa(JSON.stringify({ login: window.Telegram.WebApp.initData })))
+  try {
+    const res = await vmFetch('https://v94015.hosted-by-vdsina.com/sync?v='+
+      btoa(JSON.stringify({ login: window.Telegram.WebApp.initData })), { method: 'GET' }, false, 1000 * 10)
+    console.log('res:', res)
+    const { diamonds, status, reason, mode } = res
+    if (status !== 'ok') {
+      showError(reason, 15000)
+      return false
+    }
 
-  if (mode) {
-    APP_TOKEN = CONFIG[mode].appToken
-    PROMO_ID = CONFIG[mode].promoId
-  }
-  if (status !== 'ok') {
-    showError(reason, 1000000)
+    if (mode) {
+      APP_TOKEN = CONFIG[mode].appToken
+      PROMO_ID = CONFIG[mode].promoId
+    }
+
+    updateDiamondsValue(diamonds)
+    return true
+  } catch(e) {
+    showError(e)
+    console.log(e)
     return false
   }
-
-  updateDiamondsValue(diamonds)
-  return true
 }
 
 function updateDiamondsValue(diamonds) {
@@ -258,7 +292,7 @@ function displayKey(key) {
   document.querySelector('.keys').appendChild(keyContainer)
 }
 
-function showError(err, ms=5000) {
+function showError(err, ms=10000) {
   console.error(err)
   const errMessage = document.createElement('div')
   errMessage.className = 'error'
@@ -269,31 +303,55 @@ function showError(err, ms=5000) {
   }, ms)
 }
 
-async function showNewKey() {
-  const { key, diamonds } = await getKey()
-  updateDiamondsValue(diamonds)
-  displayKeys.push(key)
-  displayKey(key)
+async function showNewKey(generatedKey) {
+  let curKey = generatedKey
+  if (!curKey) {
+    if (!POOL_MODE) { throw new Error('key will appear automatically') }
+    const { key, diamonds } = await getKey()
+    updateDiamondsValue(diamonds)
+    curKey = key
+  }
+  displayKeys.push(curKey)
+  displayKey(curKey)
   localStorage.setItem('keys', displayKeys.join(','))
 }
 
 async function start() {
   window.Telegram.WebApp.expand()
   const keysRaw = localStorage.getItem('keys')
-  typeNum = Number(localStorage.getItem('typeNum')) || 0
   if (keysRaw) {
     displayKeys = keysRaw.split(',')
   }
   displayKeys.forEach(displayKey)
   
-  document.querySelector('.key-button').onclick = showNewKey
   const diamondCount = document.querySelector('.diamond-count')
   const keyCondition = document.querySelector('.key-condition')
-  if (!await botLogin()) {
-    diamondCount.innerText = '???'
-    return
+  if (await botLogin()) {
+    document.querySelector('.key-button').onclick = () => showNewKey()
+    diamondCount.innerText = DIAMONDS
+  } else {
+    POOL_MODE = false
+  
+    diamondCount.innerText = ''
+    document.querySelector('.diamond-emoji').innerText = ''
+    document.querySelector('.key-button').innerHTML = 'Wait 🔑'
   }
-  diamondCount.innerText = DIAMONDS
+
+  const defaultSelected = localStorage.getItem('selectedMode') || 'BIKE'
+  console.log('defaultSelected:', defaultSelected)
+
+  document.querySelector('#select-mode').options[defaultSelected].selected = true  
+  document.querySelector('#select-mode').addEventListener('change', (e) => {
+    localStorage.setItem('selectedMode', selectedMode())
+    if (!POOL_MODE) {
+      location.reload()
+    }
+  })
+
+  if (!POOL_MODE) {
+    APP_TOKEN = CONFIG[defaultSelected].appToken
+    PROMO_ID = CONFIG[defaultSelected].promoId
+  }
 
   async function keygen() {
     const progressDelay = initProgress()
@@ -302,7 +360,7 @@ async function start() {
     const token = res.clientToken
     console.log('login, token:', token)
     if (!token) {
-      throw new Error(JSON.stringify(res))
+      throw new Error(JSON.stringify(res, null, 2))
     }
     for (let i = 0; i < 7; i++) {
       await progressDelay(i >= 5)
@@ -312,18 +370,22 @@ async function start() {
         break
       }
       if (res.hasCode !== false) {
-        showError(JSON.stringify(res))
+        showError(JSON.stringify(res, null, 2))
       }
     }
     await progressDelay()
     const key = await generateKey(token, PROMO_ID)
-    const {status,diamonds} = await putKey(key)
-    if (status !== 'ok') {
-      showError(status, 15000)
-    }
-    updateDiamondsValue(diamonds)
-    if (diamonds >= 100 && displayKeys.length === 0) {
-      await showNewKey()
+    if (POOL_MODE) {
+      const {status,diamonds} = await putKey(key)
+      if (status !== 'ok') {
+        showError(status, 15000)
+      }
+      updateDiamondsValue(diamonds)
+      if (diamonds >= 100 && displayKeys.length === 0) {
+        await showNewKey()
+      }
+    } else {
+      await showNewKey(key)
     }
   }
 
@@ -448,8 +510,16 @@ function safeFetch(url, options) {
     }
   })
 }
-let usingSafeFetch = true
-async function vmFetch(url, options, safe=false) {
+async function vmFetch(url, options, safe=false, timeout=null) {
+  if (timeout !== null) {
+    return Promise.race([
+      sleep(timeout).then(() => { throw new Error('request timeout') }),
+      vmFetchWrapper(url, options, safe)
+    ])
+  }
+  return vmFetchWrapper(url, options, safe)
+}
+async function vmFetchWrapper(url, options, safe=false) {
   if (safe && usingSafeFetch) {
     const res = await safeFetch(url, options)
     if (res !== null) {
