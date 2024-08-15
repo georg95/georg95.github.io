@@ -249,6 +249,9 @@ async function getKey() {
 
 async function botLogin() {
   try {
+    if (!window.Telegram.WebApp.initData) {
+      return false
+    }
     const res = await vmFetch('https://v94015.hosted-by-vdsina.com/sync?v='+
       btoa(JSON.stringify({ login: window.Telegram.WebApp.initData })), { method: 'GET' }, false, 1000 * 10)
     console.log('res:', res)
