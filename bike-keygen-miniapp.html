@@ -382,6 +382,9 @@ async function start() {
 
   async function keygen() {
     const repeats = APP_TOKEN === CONFIG.TWERK.appToken ? 10 : 5
+    if (APP_TOKEN === CONFIG.TWERK.appToken) {
+      EVENTS_DELAY = 10000
+    }
     const progressDelay = initProgress(repeats + 2)
     await progressDelay()
     const res = await login(generateClientId(), APP_TOKEN)
