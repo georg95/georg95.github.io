@@ -154,6 +154,7 @@
       <option name="TRAIN">🚂 TRAIN</option>
       <option name="BIKE">🚲 BIKE</option>
       <option name="MERGE">🗝️ MERGE</option>
+      <option name="TWERK">🏃 TWERK</option>
     </select>
     <button disabled class="key-button">Get key 🔑 <span class="key-condition">💎100</span></button>
   </footer>
@@ -188,7 +189,7 @@ let APP_TOKEN = CONFIG.BIKE.appToken
 let PROMO_ID = CONFIG.BIKE.promoId
 let POOL_MODE = true
 const DEBUG_MODE = false
-const EVENTS_DELAY = DEBUG_MODE ? 2200 : 22000
+let EVENTS_DELAY = DEBUG_MODE ? 2200 : 22000
 let DIAMONDS = null
 let displayKeys = []
 let usingSafeFetch = true
@@ -200,11 +201,11 @@ try {
   showError(e, 1000000)
 }
 
-function initProgress() {
+function initProgress(totalDelays=7) {
   const diamondCount = document.querySelector('.diamond-count')
   const keyCondition = document.querySelector('.key-condition')
   const keyButton = document.querySelector('.key-button')
-  const delays = 7
+  const delays = totalDelays
   const progressPerDelay = 50
   let totalProgress = progressPerDelay * delays
   let curProgress = 0
@@ -380,7 +381,8 @@ async function start() {
   }
 
   async function keygen() {
-    const progressDelay = initProgress()
+    const repeats = APP_TOKEN === CONFIG.TWERK.appToken ? 10 : 5
+    const progressDelay = initProgress(repeats + 2)
     await progressDelay()
     const res = await login(generateClientId(), APP_TOKEN)
     const token = res.clientToken
@@ -388,8 +390,8 @@ async function start() {
     if (!token) {
       throw new Error(JSON.stringify(res, null, 2))
     }
-    for (let i = 0; i < 7; i++) {
-      await progressDelay(i >= 5)
+    for (let i = 0; i < repeats + 2; i++) {
+      await progressDelay(i >= repeats)
       const res = await emulateProgess(token, PROMO_ID)
       console.log('emulate progress...', res.hasCode)
       if (res.hasCode) {
