@@ -189,7 +189,7 @@ let APP_TOKEN = CONFIG.BIKE.appToken
 let PROMO_ID = CONFIG.BIKE.promoId
 let POOL_MODE = true
 const DEBUG_MODE = false
-let EVENTS_DELAY = DEBUG_MODE ? 2200 : 22000
+let EVENTS_DELAY = DEBUG_MODE ? 2200 : 30000
 let DIAMONDS = null
 let displayKeys = []
 let usingSafeFetch = true
@@ -381,10 +381,7 @@ async function start() {
   }
 
   async function keygen() {
-    const repeats = APP_TOKEN === CONFIG.TWERK.appToken ? 10 : 5
-    if (APP_TOKEN === CONFIG.TWERK.appToken) {
-      EVENTS_DELAY = 20000
-    }
+    const repeats = 12
     const progressDelay = initProgress(repeats + 2)
     await progressDelay()
     const res = await login(generateClientId(), APP_TOKEN)
