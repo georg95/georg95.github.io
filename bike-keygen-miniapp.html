@@ -108,10 +108,10 @@
       .key-condition {
         white-space: nowrap;
       }
-      .key-button {
+      .key-url, .key-button {
         flex: 2;
         cursor: pointer;
-        font-size: 24px;
+        font-size: 20px;
         font-weight: bold;
         height: 100%;
         width: 100%;
@@ -141,12 +141,10 @@
   <header>
     <span class="diamond-emoji">💎</span>
     <span class="diamond-count">...<span>
-
   </header>
   <div class="keys">
     <div class="keys"></div>
   </div>
-  <iframe sandbox="allow-scripts" onload="iframeLoaded()" src="safe-fetch.html"></iframe>
   <footer>
     <select id="select-mode">
       <option name="CLONE">👥 CLONE</option>
@@ -156,38 +154,11 @@
       <option name="MERGE">🗝️ MERGE</option>
       <option name="TWERK">🏃 TWERK</option>
     </select>
-    <button disabled class="key-button">Get key 🔑 <span class="key-condition">💎100</span></button>
+    <a href="#" class="key-url">
+      <button class="key-button">Get key 🔑 <span class="key-condition">💎100</span></button>
+    </a>
   </footer>
 <script>
-const CONFIG = {
-    BIKE: {
-        appToken: 'd28721be-fd2d-4b45-869e-9f253b554e50',
-        promoId: '43e35910-c168-4634-ad4f-52fd764a843f'
-    },
-    CLONE: {
-        appToken: '74ee0b5b-775e-4bee-974f-63e7f4d5bacb',
-        promoId: 'fe693b26-b342-4159-8808-15e3ff7f8767'
-    },
-    CUBE: {
-        appToken: 'd1690a07-3780-4068-810f-9b5bbf2931b2',
-        promoId: 'b4170868-cef0-424f-8eb9-be0622e8e8e3'
-    },
-    TRAIN: {
-        appToken: '82647f43-3f87-402d-88dd-09a90025313f',
-        promoId: 'c4480ac7-e178-4973-8061-9ed5b2e17954'
-    },
-    MERGE: {
-        appToken: "8d1cc2ad-e097-4b86-90ef-7a27e19fb833",
-        promoId: "dc128d28-c45b-411c-98ff-ac7726fbaea4",
-    },
-    TWERK: {
-        appToken: "61308365-9d16-4040-8bb0-2f4a4c69074c",
-        promoId: "61308365-9d16-4040-8bb0-2f4a4c69074c",
-    }
-}
-let APP_TOKEN = CONFIG.BIKE.appToken
-let PROMO_ID = CONFIG.BIKE.promoId
-let POOL_MODE = true
 const DEBUG_MODE = false
 let EVENTS_DELAY = DEBUG_MODE ? 2200 : 30000
 let DIAMONDS = null
@@ -199,45 +170,6 @@ try {
   start()
 } catch(e) {
   showError(e, 1000000)
-}
-
-function initProgress(totalDelays=7) {
-  const diamondCount = document.querySelector('.diamond-count')
-  const keyCondition = document.querySelector('.key-condition')
-  const keyButton = document.querySelector('.key-button')
-  const delays = totalDelays
-  const progressPerDelay = 50
-  let totalProgress = progressPerDelay * delays
-  let curProgress = 0
-  async function progressDelay(unexpected=false) {
-    if (unexpected) {
-      totalProgress += progressPerDelay
-    }
-    const delay = EVENTS_DELAY
-    const delayInterval = delay / progressPerDelay
-    for (let i = 0; i < progressPerDelay; i++) {
-      await sleep(delayInterval)
-      curProgress++
-      const percent = curProgress / totalProgress
-      if (!POOL_MODE) {
-        keyButton.style.background = `linear-gradient(90deg, #C0FFCB ${percent*100}%, #FFFFFF 0%)`
-      } else {
-        diamondCount.innerText = (DIAMONDS + 50 * percent).toFixed(1)
-      }
-      if (POOL_MODE && DIAMONDS < 100) {
-        const percentShow = DIAMONDS === 0 ? percent/2 : 0.5 + percent/2
-        keyCondition.innerText = `💎${diamondCount.innerText}/100`
-        keyButton.style.background = `linear-gradient(90deg, #C0FFCB ${percentShow*100}%, #FFFFFF 0%)`
-      }
-    }
-  }
-
-  return progressDelay
-}
-
-async function putKey(key) {
-  const keyData = btoa(JSON.stringify({ login: window.Telegram.WebApp.initData, key }))
-  return await vmFetch('https://v94015.hosted-by-vdsina.com/putkey?v='+keyData, { method: 'POST' })
 }
 
 function selectedMode() {
@@ -266,11 +198,6 @@ async function botLogin() {
       return false
     }
 
-    if (mode) {
-      APP_TOKEN = CONFIG[mode].appToken
-      PROMO_ID = CONFIG[mode].promoId
-    }
-
     updateDiamondsValue(diamonds)
     return true
   } catch(e) {
@@ -281,15 +208,15 @@ async function botLogin() {
 }
 
 function updateDiamondsValue(diamonds) {
+  console.log('updateDiamondsValue', diamonds)
   DIAMONDS = diamonds
-  document.querySelector('.key-button').disabled = DIAMONDS < 100
-  document.querySelector('.key-button').style.background = ''
-  if (DIAMONDS >= 100) {
-    document.querySelector('.key-condition').innerText = '(💎100)'
-  }
   document.querySelector('.diamond-count').innerText = diamonds
+  if (DIAMONDS < 100) {
+    document.querySelector('.key-url').href = 'https://t.me/keygen_base'
+    document.querySelector('.key-button').innerHTML = 'Mining is over'
+    document.querySelector('.key-button').style.background = ''
+  }
 }
-
 
 function displayKey(key) {
   console.log('displayKey', key)
@@ -333,7 +260,6 @@ function showError(err, ms=10000) {
 async function showNewKey(generatedKey) {
   let curKey = generatedKey
   if (!curKey) {
-    if (!POOL_MODE) { throw new Error('key will appear automatically') }
     const { key, diamonds } = await getKey()
     updateDiamondsValue(diamonds)
     curKey = key
@@ -350,222 +276,35 @@ async function start() {
     displayKeys = keysRaw.split(',')
   }
   displayKeys.forEach(displayKey)
-  
-  const diamondCount = document.querySelector('.diamond-count')
-  const keyCondition = document.querySelector('.key-condition')
+
   if (await botLogin()) {
     document.querySelector('.key-button').onclick = () => showNewKey()
-    diamondCount.innerText = DIAMONDS
   } else {
-    POOL_MODE = false
-  
-    diamondCount.innerText = ''
+    document.querySelector('.diamond-count').innerText = ''
     document.querySelector('.diamond-emoji').innerText = ''
-    document.querySelector('.key-button').innerHTML = 'Wait 🔑'
+    document.querySelector('.key-button').innerHTML = 'Mining is over'
+    document.querySelector('.key-url').href = 'https://t.me/keygen_base'
   }
 
   const defaultSelected = localStorage.getItem('selectedMode') || 'BIKE'
   console.log('defaultSelected:', defaultSelected)
-
   document.querySelector('#select-mode').options[defaultSelected].selected = true  
   document.querySelector('#select-mode').addEventListener('change', (e) => {
     localStorage.setItem('selectedMode', selectedMode())
-    if (!POOL_MODE) {
-      location.reload()
-    }
-  })
-
-  if (!POOL_MODE) {
-    APP_TOKEN = CONFIG[defaultSelected].appToken
-    PROMO_ID = CONFIG[defaultSelected].promoId
-  }
-
-  async function keygen() {
-    const repeats = 12
-    const progressDelay = initProgress(repeats + 2)
-    await progressDelay()
-    const res = await login(generateClientId(), APP_TOKEN)
-    const token = res.clientToken
-    console.log('login, token:', token)
-    if (!token) {
-      throw new Error(JSON.stringify(res, null, 2))
-    }
-    for (let i = 0; i < repeats + 2; i++) {
-      await progressDelay(i >= repeats)
-      const res = await emulateProgess(token, PROMO_ID)
-      console.log('emulate progress...', res.hasCode)
-      if (res.hasCode) {
-        break
-      }
-      if (res.hasCode !== false) {
-        showError(JSON.stringify(res, null, 2))
-      }
-    }
-    await progressDelay()
-    const key = await generateKey(token, PROMO_ID)
-    if (POOL_MODE) {
-      const {status,diamonds} = await putKey(key)
-      if (status !== 'ok') {
-        showError(status, 15000)
-      }
-      updateDiamondsValue(diamonds)
-      if (diamonds >= 100 && displayKeys.length === 0) {
-        await showNewKey()
-      }
-    } else {
-      await showNewKey(key)
-    }
-  }
-
-  while(true) {
-    try {
-      await keygen()
-    } catch(e) {
-      showError(e, 15000)
-      await sleep(3000)
-    }
-  }
-}
-
-async function login(clientId, appToken) {
-    if(!clientId) { throw new Error('no client id') }
-    if (DEBUG_MODE) {
-      return { clientToken: 'd28721be-fd2d-4b45-869e-9f253b554e50:deviceid:1722266117413-8779883520062908680:8B5BnSuEV2W:'+Date.now() }
-    }
-    const res = await vmFetch('https://api.gamepromo.io/promo/login-client', {
-        headers: {
-            'content-type': 'application/json; charset=utf-8',
-            'Host': 'api.gamepromo.io'
-        },
-        referrer: "",
-        method: 'POST',
-        body: JSON.stringify({
-            appToken,
-            clientId: clientId,
-            clientOrigin: 'deviceid'
-        })
-    }, true)
-    return res
-}
-
-const attempts = {}
-async function emulateProgess(clientToken, promoId) {
-    if(!clientToken) { throw new Error('no access token') }
-    if (DEBUG_MODE) {
-      attempts[clientToken] = (attempts[clientToken] || 0) + 1
-      return { hasCode: attempts[clientToken] >= 5 }
-    }
-    function uuidv4() {
-      return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, c =>
-        (+c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> +c / 4).toString(16)
-      );
-    }
-    const res = await vmFetch('https://api.gamepromo.io/promo/register-event', {
-        headers: {
-            'content-type': 'application/json; charset=utf-8',
-            'Host': 'api.gamepromo.io',
-            'Authorization': `Bearer ${clientToken}`
-        },
-        referrer: "",
-        method: 'POST',
-        body: JSON.stringify({
-            promoId,
-            eventId: uuidv4(),
-            eventOrigin: 'undefined'
-        })
-    }, true)
-    return res
-}
-
-async function generateKey(clientToken, promoId) {
-    if (DEBUG_MODE) {
-      if (attempts[clientToken] >= 5) {
-        return 'B1KE-3YD-5ZA6-3VJA-Y77'
-      } else {
-        return ''
-      }
-    }
-    const { promoCode } = await vmFetch('https://api.gamepromo.io/promo/create-code', {
-        headers: {
-            'content-type': 'application/json; charset=utf-8',
-            'Host': 'api.gamepromo.io',
-            'Authorization': `Bearer ${clientToken}`
-        },
-        referrer: "",
-        method: 'POST',
-        body: JSON.stringify({
-            promoId
-        })
-    }, true)
-    return promoCode
-}
-
-function iframeLoaded() {
-  window.iframeReady = true
-}
-function waitFrameLoad() {
-  return new Promise(async (resolve) => {
-    const iframe = document.querySelector('iframe')
-    while(true) {
-      if (window.iframeReady) {
-        resolve(iframe)
-        return
-      }
-      await sleep(500)
-    }
   })
 }
 
-function safeFetch(url, options) {
-  return new Promise(async (resolve) => {
-    let i = setTimeout(() => {
-      resolve(null)
-    }, 10000)
-    try {
-      const iframe = await waitFrameLoad()
-      const id = Math.round(Math.random() * 10000000)
-      iframe.contentWindow.postMessage({ url, options, id }, '*')
-      function onMessage(e) {
-        if (e.data.id === id) {
-          window.removeEventListener('message', onMessage)
-          clearTimeout(i)
-          resolve(e.data.resp)
-        }
-      }
-      window.addEventListener('message', onMessage)
-    } catch(e) {
-      resolve(null)
-    }
-  })
-}
 async function vmFetch(url, options, safe=false, timeout=null) {
   if (timeout !== null) {
     return Promise.race([
       sleep(timeout).then(() => { throw new Error('request timeout') }),
-      vmFetchWrapper(url, options, safe)
+      fetch(url, options).then(res => res.json())
     ])
   }
-  return vmFetchWrapper(url, options, safe)
-}
-async function vmFetchWrapper(url, options, safe=false) {
-  if (safe && usingSafeFetch) {
-    const res = await safeFetch(url, options)
-    if (res !== null) {
-      return res
-    }
-
-    usingSafeFetch = false
-  }
-
   return fetch(url, options).then(res => res.json())
 }
 async function sleep(ms) {
     return new Promise(res => setTimeout(res, ms))
-}
-function generateClientId() {
-    const timestamp = Date.now();
-    const randomNumbers = Array.from({ length: 19 }, () => Math.floor(Math.random() * 10)).join('');
-    return `${timestamp}-${randomNumbers}`;
 }
 </script>
 </body>
