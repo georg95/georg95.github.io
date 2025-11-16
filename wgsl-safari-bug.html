@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+    <style>
+        html, body {
+            width: 100%;
+            box-sizing: border-box;
+            background-color: #222;
+            font-size: 15px;
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            color: bisque;
+        }
+        html {
+            padding: 0;
+            max-width: 800px;
+        }
+        body {
+            padding: 20px;
+        }
+        pre {
+            text-wrap: auto;
+        }
+        #errlog {
+            color: lightcoral;
+        }
+    </style>
+</head>
+<body>
+  <pre id="output"></pre>
+  <pre id="errlog"></pre>
+  <script>
+
+var code = `
+const PTK_HASHDATA   = array<array<u32, 16>, 1>(array<u32, 16>(0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0));
+const EAPOL_HASHDATA = array<array<u32, 16>, 1>(array<u32, 16>(0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0));
+
+@group(0) @binding(0) var<storage, read> input: array<u32>;
+@group(0) @binding(1) var<storage, read_write> output: array<u32>;
+
+@compute @workgroup_size(64)
+fn main(@builtin(global_invocation_id) gid: vec3<u32>) {
+  output[gid.x] = gid.x;
+}
+`
+
+async function wgslCompilationText() {
+  if (!navigator.gpu) {
+    window.errlog.innerHTML += `❌ WebGPU not supported on this platform`
+    return
+  }
+
+  const adapter = await navigator.gpu.requestAdapter({ powerPreference: 'high-performance' })
+  const device = await adapter.requestDevice()
+  window.output.innerHTML += `Compiling shader...\n\n`
+  const module = device.createShaderModule({ code })
+  const shaderInfo = await module.getCompilationInfo()
+  console.log(shaderInfo)
+
+  if (shaderInfo.messages?.length > 0) {
+    const errstr = shaderInfo.messages.map((m) => m.message).join('\n')
+    window.errlog.innerHTML += `❌ ${errstr}`
+  } else {
+    window.output.innerHTML += `✅ WebGPU shader compiled successfuly!`
+  }
+}
+wgslCompilationText()
+  </script>
+</body>
+</html>
